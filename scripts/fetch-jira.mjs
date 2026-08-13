@@ -1,6 +1,6 @@
 import { writeFile, mkdir, readFile } from 'node:fs/promises';
 import { JIRA } from './config.mjs';
-import { classify, areaOf } from './families.mjs';
+import { classify } from './families.mjs';
 
 if (!JIRA.email || !JIRA.token) {
   console.warn('JIRA_EMAIL / JIRA_API_TOKEN ausentes — mantendo data/roadmap.json como está.');
@@ -45,9 +45,16 @@ function adfToText(node) {
 }
 
 const clean = (s, max) => {
-  const t = s.replace(/[*_`#]|\\\[|\\\]/g, '').replace(/\s+/g, ' ').trim();
-  return t.length > max ? t.slice(0, max - 1).replace(/[\s,;.]+\S*$/, '') + '…' : t;
+  const t = s
+    .replace(/\\?\[\s*[xX ]?\s*\\?\]/g, '')          // caixas de checklist "[ ]" / "[x]"
+    .replace(/[*_`#]/g, '')
+    .replace(/^[\p{Emoji_Presentation}\p{Extended_Pictographic}\s]+/u, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return t.length > max ? t.slice(0, max - 1).replace(/[\s,;.:]+\S*$/, '') + '…' : t;
 };
+
+const HEADING = /^\s*[^\p{L}]*(contexto|objetivo|o que deve ser feito|estado atual|requisitos?[^:]*|crit[ée]rios? de aceite|pend[êe]ncias[^:]*|bloqueios|refer[êe]ncias?[^:]*|tipo de valida[çc][ãa]o|qa com[^:]*|prioridade|m[ée]tricas?[^:]*|hip[óo]tese|estrat[ée]gia|entreg[áa]veis[^:]*|resultado esperado|marcas? impactadas?|sistemas envolvidos|escopo|categoria)\s*:?\s*$/iu;
 
 // Pega o corpo de uma seção do markdown/ADF achatado, até o próximo cabeçalho.
 function section(text, ...titles) {
@@ -56,11 +63,16 @@ function section(text, ...titles) {
     const i = lines.findIndex(l => new RegExp(`^\\s*(#+\\s*)?[^\\w]*${title}\\b`, 'i').test(l));
     if (i === -1) continue;
     const body = [];
+    const heading = new RegExp(`^[^\\w]*${title}\\b`, 'i');
     for (let j = i + 1; j < lines.length; j++) {
       const l = lines[j];
-      if (/^\s*(#{1,4}\s|[🎯🧠📝⚙️🔒✅🧪⚠️🔗📊📐🎨]\s*[A-ZÀ-Ú])/.test(l) && body.length) break;
-      if (/^\s*#{1,4}\s/.test(l) && body.length) break;
-      if (l.trim()) body.push(l.trim().replace(/^[-*•]\s*\[[ x]\]\s*/i, '').replace(/^[-*•]\s*/, ''));
+      // Um novo cabeçalho encerra a seção. Precisa da flag `u`: sem ela os emojis
+      // (pares surrogados) não casam dentro de classe de caracteres. E o ADF achatado
+      // perde o "##", então também cortamos em linhas que são só um título conhecido.
+      if (body.length && (/^\s*(#{1,4}\s|\p{Extended_Pictographic}\s*\p{Lu})/u.test(l) || HEADING.test(l))) break;
+      const clean_ = l.trim().replace(/^[-*•]\s*/, '');
+      // pula repetição do próprio cabeçalho (o ADF costuma duplicar "🎯 Objetivo")
+      if (clean_ && !(body.length === 0 && heading.test(clean_.replace(/^[^\p{L}]+/u, '')))) body.push(clean_);
       if (body.join(' ').length > 400) break;
     }
     if (body.length) return body.join(' ');
@@ -98,14 +110,11 @@ function shape(issue, vertical) {
   const isAB = /\[A\/B\]|\[AB\s/i.test(summary) || /teste\s+A\/B|implementada como teste A\/B/i.test(text);
   const kind = isEpic ? 'epic' : isAB ? 'ab' : 'prod';
 
-  // Título sem os prefixos de marca, que já viram chip.
-  const title = summary
-    .replace(/\[AB\s+[^\]]+\]\s*/i, '')
-    .replace(new RegExp(`^\\[${brand.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\]\\s*`, 'i'), '')
-    .replace(/^\[A\/B\]\s*/i, '')
-    .trim() || summary;
+  // Título sem os prefixos entre colchetes — marca e área já viram chip.
+  const title = summary.replace(/^(\s*\[[^\]]*\]\s*)+/, '').trim() || summary;
 
-  const { family } = classify(summary, issue.fields.issuetype?.name ?? '');
+  const { family, area } = classify(summary.replace(/\[AB\s+[^\]]+\]\s*/i, ''),
+                                    issue.fields.issuetype?.name ?? '');
   const known = FAMILIES.has(family) ? family : null;
 
   const statusRaw = issue.fields.status?.name ?? '';
@@ -114,7 +123,7 @@ function shape(issue, vertical) {
     vert: vertical,
     brand,
     title: isEpic && !/épico|epic/i.test(title) ? `${title} (épico)` : title,
-    area: tags.length > 1 || !ab ? areaOf(summary.replace(/\[AB\s+[^\]]+\]\s*/i, ''), '') : areaOf(summary, ''),
+    area,
     status: STATUS[statusRaw.toLowerCase()] ?? statusRaw,
     kind,
     created: issue.fields.created?.slice(0, 10) ?? null,
@@ -129,10 +138,23 @@ function shape(issue, vertical) {
 const tests = JSON.parse(await readFile('data/tests.json', 'utf8').catch(() => '[]'));
 const FAMILIES = new Set(tests.map(t => t.family));
 
+// Épicos e tarefas sem colchete guardam a marca no meio do título ("Evoluções WAK").
+// Depois de conhecer as marcas da vertical, preenchemos as que ficaram em branco.
+function backfillBrands(rows) {
+  const known = [...new Set(rows.map(r => r.brand).filter(Boolean))]
+    .sort((a, b) => b.length - a.length);
+  for (const r of rows) {
+    if (r.brand) continue;
+    const hit = known.find(b => new RegExp(`\\b${b.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i').test(r.title));
+    if (hit) r.brand = hit;
+  }
+  return rows;
+}
+
 const roadmap = [];
 for (const src of JIRA.sources) {
   const issues = await search(src.jql);
-  const rows = issues.map(i => shape(i, src.vertical));
+  const rows = backfillBrands(issues.map(i => shape(i, src.vertical)));
   roadmap.push(...rows);
   console.log(`${src.vertical.padEnd(7)} ${String(rows.length).padStart(3)} itens ` +
               `(${rows.filter(r => r.kind === 'ab').length} testes A/B)`);

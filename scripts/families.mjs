@@ -8,7 +8,7 @@ export const RULES = [
   [/Fase \d|Kokeshi (Novo Tema|Rebrand)/i,                     'Virada de tema Kokeshi',            'TEMA'],
   [/Tema Gogroup|Gogroup-Theme|novo tema global|Estrutura de Tema novo|Teste Elevate/i,
                                                               'Virada de tema Gogroup',            'TEMA'],
-  [/Videowise/i,                                              'Videowise (vídeos UGC)',            'PDP'],
+  [/Videowise|Widde/i,                                        'Vídeos UGC na PDP',                 'PDP'],
   [/Card de [Pp]roduto/i,                                     'Card de produto refatorado',        'TEMA'],
   [/Collection Slider/i,                                      'Collection slider na home',         'HOME'],
   [/1st fold|1º fold|Collection Page Enriquecida/i,            'Collection 1st fold enriquecido',   'COLEÇÃO'],
@@ -21,7 +21,8 @@ export const RULES = [
   [/carros?sel|Vitrine (Grid|vs)/i,                            'Vitrine: grid vs. carrossel',       'HOME'],
   [/Seletor de (Linha|Tipo)/i,                                'Seletor de linha em destaque',      'HOME'],
   [/\[Imagens?\]|Imagem de Produto/i,                          'Imagem de produto',                 'IMAGEM'],
-  [/Selo|prova social|urgência/i,                             'Prova social / urgência',           'PDP'],
+  [/Selo dinâmico|Selos? de prova social|prova social|urgência/i,
+                                                              'Prova social / urgência',           'PDP'],
   [/Review|Judge\.me/i,                                       'Reviews na PDP',                    'PDP'],
   [/Announcement Bar/i,                                       'Banner na announcement bar',        'TEMA'],
   [/ABC de credibilidade|Compare at price|Formatação de preço/i,
@@ -39,10 +40,24 @@ const AREA_BY_TAG = {
   '[site]': 'COLEÇÃO', '[cart ]': 'CARRINHO',
 };
 
+const AREA_BY_WORD = [
+  [/\bPDP\b|página de produto|produto/i, 'PDP'],
+  [/collection|coleção|\bPLP\b|vitrine/i, 'COLEÇÃO'],
+  [/carrinho|\bcart\b|checkout/i,        'CARRINHO'],
+  [/\bhome\b|hero|homepage/i,            'HOME'],
+  [/tema|theme/i,                        'TEMA'],
+  [/preço|desconto|pix|parcelad/i,        'PREÇO'],
+  [/imagem|imagens|foto/i,               'IMAGEM'],
+];
+
 export function areaOf(name, type) {
   const lower = name.trim().toLowerCase();
-  for (const [tag, area] of Object.entries(AREA_BY_TAG)) if (lower.startsWith(tag)) return area;
-  return AREA_BY_TYPE[type] ?? 'OUTRO';
+  // Uma tag explícita no título ganha de tudo: [PDP], [Cart], [Home]...
+  for (const [tag, area] of Object.entries(AREA_BY_TAG)) if (lower.includes(tag)) return area;
+  for (const [re, family, area] of RULES) if (re.test(name)) return area;
+  if (AREA_BY_TYPE[type]) return AREA_BY_TYPE[type];
+  for (const [re, area] of AREA_BY_WORD) if (re.test(name)) return area;
+  return 'OUTRO';
 }
 
 // Devolve { family, area }. Testes que não casam com nenhuma regra viram família própria,
