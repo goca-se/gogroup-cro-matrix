@@ -55,9 +55,20 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/
-          git diff --staged --quiet || git commit -m "dados: snapshot de $(date -u +%Y-%m-%d\ %H:%M) UTC"
-          git push
+          # `data/` é gerado, então nunca há o que mesclar: reancoramos no topo do
+          # remoto e recomitamos por cima. Sem isso, um push concorrente derruba o run.
+          for tentativa in 1 2 3; do
+            git fetch -q origin main
+            git reset -q --soft origin/main
+            git add data/
+            if git diff --staged --quiet; then echo "sem mudança nos dados"; exit 0; fi
+            git commit -qm "dados: snapshot de $(date -u +%Y-%m-%d\ %H:%M) UTC"
+            git push -q origin HEAD:main && exit 0
+            echo "push recusado (tentativa $tentativa), reancorando…"
+            sleep $((tentativa * 5))
+          done
+          echo "::error::não consegui gravar o snapshot depois de 3 tentativas"
+          exit 1
 
       - uses: actions/upload-artifact@v4
         with:
