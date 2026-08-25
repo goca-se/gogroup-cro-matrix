@@ -62,18 +62,34 @@ if (missing.length) console.warn(`Sem token, pulando: ${missing.join(', ')}`);
 const all = [];
 for (const store of active) {
   const token = tokenFor(store.key);
-  const tests = await listTests(token);
-  const rows = await pool(tests, 6, async (t) => {
-    const [results, sig] = await Promise.all([
-      call(token, 'get_test_results', { testId: t.testId }).catch(() => null),
-      call(token, 'get_statistical_significance', { testId: t.testId }).catch(() => null),
-    ]);
-    return shape(store.key, t, results, sig);
-  });
-  all.push(...rows);
-  const noData = rows.filter(r => r.rpvL == null).length;
-  console.log(`${store.name.padEnd(10)} ${String(rows.length).padStart(3)} testes` +
-              (noData ? `  (${noData} sem dados de variação)` : ''));
+
+  // Uma loja com falha de rede/token aqui não pode derrubar a coleta das demais — o fetch diário
+  // roda em CI e writeFile só acontece depois deste loop, então sem try/catch um erro numa loja
+  // perderia os dados já buscados de todas as outras.
+  try {
+    // A moeda vive em config.mjs (o build precisa dela mesmo sem rede), mas o Elevate é a fonte
+    // da verdade: se divergir, o painel formataria dinheiro com o símbolo errado.
+    const overview = await call(token, 'get_store_overview').catch(() => null);
+    if (overview?.currency && overview.currency !== store.currency) {
+      console.warn(`AVISO ${store.name}: config diz ${store.currency}, Elevate diz ` +
+                   `${overview.currency}. Corrija scripts/config.mjs.`);
+    }
+
+    const tests = await listTests(token);
+    const rows = await pool(tests, 6, async (t) => {
+      const [results, sig] = await Promise.all([
+        call(token, 'get_test_results', { testId: t.testId }).catch(() => null),
+        call(token, 'get_statistical_significance', { testId: t.testId }).catch(() => null),
+      ]);
+      return shape(store.key, t, results, sig);
+    });
+    all.push(...rows);
+    const noData = rows.filter(r => r.rpvL == null).length;
+    console.log(`${store.name.padEnd(10)} ${String(rows.length).padStart(3)} testes` +
+                (noData ? `  (${noData} sem dados de variação)` : ''));
+  } catch (err) {
+    console.error(`ERRO ${store.name}: ${err.message} — pulando esta loja nesta execução.`);
+  }
 }
 
 await mkdir('data', { recursive: true });

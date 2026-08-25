@@ -1,3 +1,8 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Matriz CRO Gobeaute</title>
 <script id="data" type="application/json">__DATA__</script>
 <script id="roadmap" type="application/json">__ROADMAP__</script>
@@ -179,6 +184,8 @@ tbody tr:hover th,tbody tr:hover td{background:var(--panel)}
   color:var(--muted);font-weight:700}
 .kpi .v{font-size:26px;font-weight:700;margin-top:8px;letter-spacing:-.035em;color:var(--head)}
 .kpi .v.pos{color:var(--win)}.kpi .v.neg{color:var(--loss)}
+/* valor quebrado por moeda: cabe mais texto, então reduz e deixa quebrar linha */
+.kpi .v.moedas{font-size:15px;line-height:1.35;letter-spacing:-.01em;word-spacing:.05em}
 .kpi .n{color:var(--muted);font-size:11px;margin-top:2px}
 
 /* ---------- cards de teste ---------- */
@@ -298,6 +305,8 @@ tbody tr:hover th,tbody tr:hover td{background:var(--panel)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 
 </style>
+</head>
+<body>
 
 <div class="frame">
 <header class="top">
@@ -317,31 +326,31 @@ tbody tr:hover th,tbody tr:hover td{background:var(--panel)}
 <section id="v-matriz" role="tabpanel">
   <div class="pagehead">
     <div>
-      <span class="eyebrow">Teste A/B</span>
-      <h1>Matriz de <em>testes</em></h1>
+      <span class="eyebrow" id="mx-eyebrow">Teste A/B</span>
+      <h1 id="mx-h1">Matriz de <em>testes</em></h1>
       <p class="sub" id="mx-stats"></p>
     </div>
     <div class="legend">
-      <span><i class="lg-w"></i>Vencedor</span>
-      <span><i class="lg-c"></i>Controle venceu</span>
-      <span><i class="lg-i"></i>Inconclusivo</span>
-      <span><i class="lg-r"></i>Em teste</span>
+      <span><i class="lg-w"></i><span id="lg-winner">Vencedor</span></span>
+      <span><i class="lg-c"></i><span id="lg-control">Controle venceu</span></span>
+      <span><i class="lg-i"></i><span id="lg-inconclusive">Inconclusivo</span></span>
+      <span><i class="lg-r"></i><span id="lg-running">Em teste</span></span>
     </div>
   </div>
   <div class="controls">
     <div class="field"><select id="f-res">
-      <option value="">Todos os resultados</option>
-      <option value="winner">Vencedor</option>
-      <option value="control">Controle venceu</option>
-      <option value="inconclusive">Inconclusivo</option>
-      <option value="running">Em teste</option>
+      <option id="f-res-all" value="">Todos os resultados</option>
+      <option id="f-res-winner" value="winner">Vencedor</option>
+      <option id="f-res-control" value="control">Controle venceu</option>
+      <option id="f-res-inconclusive" value="inconclusive">Inconclusivo</option>
+      <option id="f-res-running" value="running">Em teste</option>
     </select></div>
-    <div class="field"><select id="f-store"><option value="">Todas as marcas</option></select></div>
-    <div class="field"><select id="f-area"><option value="">Todas as áreas</option></select></div>
+    <div class="field"><select id="f-store"><option id="f-store-all" value="">Todas as marcas</option></select></div>
+    <div class="field"><select id="f-area"><option id="f-area-all" value="">Todas as áreas</option></select></div>
     <div class="seg" id="f-scope">
-      <button data-scope="" aria-pressed="true">Todas</button>
-      <button data-scope="multi" aria-pressed="false">Multimarca</button>
-      <button data-scope="solo" aria-pressed="false">Exclusivas</button>
+      <button id="f-scope-all" data-scope="" aria-pressed="true">Todas</button>
+      <button id="f-scope-multi" data-scope="multi" aria-pressed="false">Multimarca</button>
+      <button id="f-scope-solo" data-scope="solo" aria-pressed="false">Exclusivas</button>
     </div>
     <div class="search"><input id="f-q" type="search" placeholder="Buscar família ou teste…"></div>
   </div>
@@ -351,32 +360,32 @@ tbody tr:hover th,tbody tr:hover td{background:var(--panel)}
 
 <section id="v-testes" role="tabpanel" hidden>
   <div class="pagehead">
-    <div><span class="eyebrow">Resultados</span><h1>Testes <em>A/B</em></h1><p class="sub" id="tt-stats"></p></div>
+    <div><span class="eyebrow" id="tt-eyebrow">Resultados</span><h1 id="tt-h1">Testes <em>A/B</em></h1><p class="sub" id="tt-stats"></p></div>
   </div>
   <div class="kpis" id="tt-kpis"></div>
   <div class="controls">
-    <div class="field"><select id="t-store"><option value="">Todas as marcas</option></select></div>
+    <div class="field"><select id="t-store"><option id="t-store-all" value="">Todas as marcas</option></select></div>
     <div class="field"><select id="t-res">
-      <option value="">Todos os resultados</option>
-      <option value="winner">Vencedor</option>
-      <option value="control">Controle venceu</option>
-      <option value="inconclusive">Inconclusivo</option>
-      <option value="running">Em teste</option>
+      <option id="t-res-all" value="">Todos os resultados</option>
+      <option id="t-res-winner" value="winner">Vencedor</option>
+      <option id="t-res-control" value="control">Controle venceu</option>
+      <option id="t-res-inconclusive" value="inconclusive">Inconclusivo</option>
+      <option id="t-res-running" value="running">Em teste</option>
     </select></div>
     <div class="field"><select id="t-status">
-      <option value="">Todos os status</option>
-      <option value="Running">Rodando</option>
-      <option value="Paused">Pausado</option>
-      <option value="Done">Finalizado</option>
+      <option id="t-status-all" value="">Todos os status</option>
+      <option id="t-status-running" value="Running">Rodando</option>
+      <option id="t-status-paused" value="Paused">Pausado</option>
+      <option id="t-status-done" value="Done">Finalizado</option>
     </select></div>
-    <div class="field"><select id="t-area"><option value="">Todas as áreas</option></select></div>
+    <div class="field"><select id="t-area"><option id="t-area-all" value="">Todas as áreas</option></select></div>
     <div class="field"><select id="t-sort">
-      <option value="date">Ordenar: data</option>
-      <option value="rpv">Ordenar: RPV</option>
-      <option value="cr">Ordenar: CR</option>
-      <option value="aov">Ordenar: AOV</option>
-      <option value="incr">Ordenar: incremento R$</option>
-      <option value="vis">Ordenar: visitantes</option>
+      <option id="t-sort-date" value="date">Ordenar: data</option>
+      <option id="t-sort-rpv" value="rpv">Ordenar: RPV</option>
+      <option id="t-sort-cr" value="cr">Ordenar: CR</option>
+      <option id="t-sort-aov" value="aov">Ordenar: AOV</option>
+      <option id="t-sort-incr" value="incr">Ordenar: incremento</option>
+      <option id="t-sort-vis" value="vis">Ordenar: visitantes</option>
     </select></div>
     <span id="t-chip"></span>
     <div class="search"><input id="t-q" type="search" placeholder="Buscar teste…"></div>
@@ -387,22 +396,22 @@ tbody tr:hover th,tbody tr:hover td{background:var(--panel)}
 
 <section id="v-ganho" role="tabpanel" hidden>
   <div class="pagehead">
-    <div><span class="eyebrow">Jornada</span><h1>Ganho <em>acumulado</em></h1>
+    <div><span class="eyebrow" id="gn-eyebrow">Jornada</span><h1 id="gn-h1">Ganho <em>acumulado</em></h1>
       <p class="sub" id="gn-stats"></p></div>
   </div>
   <div class="controls">
     <div class="seg" id="g-co"></div>
     <div class="field"><select id="g-store"></select></div>
     <div class="field"><select id="g-goal">
-      <option value="10">Meta +10%</option>
-      <option value="20">Meta +20%</option>
-      <option value="30" selected>Meta +30%</option>
-      <option value="50">Meta +50%</option>
+      <option id="g-goal-10" value="10">Meta +10%</option>
+      <option id="g-goal-20" value="20">Meta +20%</option>
+      <option id="g-goal-30" value="30" selected>Meta +30%</option>
+      <option id="g-goal-50" value="50">Meta +50%</option>
     </select></div>
   </div>
   <div class="kpis" id="gn-kpis"></div>
   <div class="mtn">
-    <h4>Jornada até o topo</h4>
+    <h4 id="gn-mtn-h4">Jornada até o topo</h4>
     <div id="gn-chart"></div>
   </div>
   <div class="rank" id="gn-rank"></div>
@@ -411,20 +420,20 @@ tbody tr:hover th,tbody tr:hover td{background:var(--panel)}
 
 <section id="v-roadmap" role="tabpanel" hidden>
   <div class="pagehead">
-    <div><span class="eyebrow">Próximos</span><h1>Roadmap de <em>testes</em></h1><p class="sub" id="rd-stats"></p></div>
+    <div><span class="eyebrow" id="rd-eyebrow">Próximos</span><h1 id="rd-h1">Roadmap de <em>testes</em></h1><p class="sub" id="rd-stats"></p></div>
   </div>
   <div class="controls">
     <div class="seg" id="r-kind">
-      <button data-kind="ab" aria-pressed="true">Testes A/B</button>
-      <button data-kind="" aria-pressed="false">Tudo</button>
+      <button id="r-kind-ab" data-kind="ab" aria-pressed="true">Testes A/B</button>
+      <button id="r-kind-all" data-kind="" aria-pressed="false">Tudo</button>
     </div>
     <div class="field"><select id="r-vert">
-      <option value="">Todas as verticais</option>
+      <option id="r-vert-all" value="">Todas as verticais</option>
       <option value="beaute">Gobeaute</option>
       <option value="jump">GoJump</option>
     </select></div>
-    <div class="field"><select id="r-brand"><option value="">Todas as marcas</option></select></div>
-    <div class="field"><select id="r-status"><option value="">Todos os status</option></select></div>
+    <div class="field"><select id="r-brand"><option id="r-brand-all" value="">Todas as marcas</option></select></div>
+    <div class="field"><select id="r-status"><option id="r-status-all" value="">Todos os status</option></select></div>
     <div class="search"><input id="r-q" type="search" placeholder="Buscar teste ou chave…"></div>
   </div>
   <div id="rd-body"></div>
@@ -440,16 +449,47 @@ const VERTS   = JSON.parse(document.getElementById('verts').textContent);
 const UPDATED = JSON.parse(document.getElementById('updated').textContent);
 const VNAME   = Object.fromEntries(VERTS);
 const storesOf = v => STORES.filter(s=>s.v===v);
+const vertOf = (storeKey) => STORES.find(s=>s.k===storeKey)?.v;
 const SN = Object.fromEntries(STORES.map(s=>[s.k,s.n]));
-const RES = {winner:'Vencedor', control:'Controle venceu', inconclusive:'Inconclusivo',
-             running:'Em teste', paused:'Pausado'};
-const STATUS = {Running:'Rodando', Paused:'Pausado', Done:'Finalizado'};
+// Cada aba escolhe seu próprio idioma a partir do seu próprio filtro (não existe uma vertical
+// global): Matriz/Testes olham a loja selecionada, Ganho olha o toggle de vertical, Roadmap olha
+// o filtro de vertical. Quando o filtro mistura as duas verticais, fica em português (padrão).
+const langMatrix  = () => (S.store  && vertOf(S.store)  === 'jump') ? 'en' : 'pt';
+const langTestes  = () => (S.tStore && vertOf(S.tStore) === 'jump') ? 'en' : 'pt';
+const RES = {
+  pt: {winner:'Vencedor', control:'Controle venceu', inconclusive:'Inconclusivo', running:'Em teste', paused:'Pausado'},
+  en: {winner:'Winner',   control:'Control won',      inconclusive:'Inconclusive', running:'Running',  paused:'Paused'},
+};
+const STATUS = {
+  pt: {Running:'Rodando', Paused:'Pausado', Done:'Finalizado'},
+  en: {Running:'Running', Paused:'Paused',  Done:'Done'},
+};
+const AREA_EN = {PDP:'PDP', CARRINHO:'CART', HOME:'HOME', 'COLEÇÃO':'COLLECTION', TEMA:'THEME',
+                 FEATURE:'FEATURE', 'PREÇO':'PRICE', IMAGEM:'IMAGE', OUTRO:'OTHER'};
+const trArea = (area, lang) => lang === 'en' ? (AREA_EN[area] ?? area) : area;
 const nf1 = new Intl.NumberFormat('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1});
 const nf2 = new Intl.NumberFormat('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 const nf0 = new Intl.NumberFormat('pt-BR',{maximumFractionDigits:0});
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const pct = v => v==null ? '—' : (v>0?'+':'') + nf1.format(v) + '%';
-const brl = v => v==null ? '—' : 'R$ ' + nf2.format(v);
+const pl = (n, s, p) => `${n} ${n===1 ? s : p}`;
+
+/* Dinheiro. Cada loja fatura na sua moeda e não há conversão aqui, então valores em dinheiro
+   só são somados dentro de uma mesma moeda — somaCur devolve um total por moeda. */
+const SC  = Object.fromEntries(STORES.map(s=>[s.k, s.c || 'BRL']));
+const SYM = {BRL:'R$', USD:'US$', EUR:'€', GBP:'£', AUD:'A$', CAD:'C$'};
+const sym = c => SYM[c] || (c ? c+' ' : '');
+const money = (v, cur) => v==null ? '—' : sym(cur) + ' ' + nf2.format(v);
+// Soma `pick` por moeda da loja. Devolve [[moeda, total], ...] em ordem de magnitude.
+const somaCur = (ts, pick = t=>t.incr) => {
+  const by = new Map();
+  for (const t of ts) { const c = SC[t.store]; by.set(c, (by.get(c) ?? 0) + (pick(t) || 0)); }
+  return [...by].sort((a,b)=>Math.abs(b[1])-Math.abs(a[1]));
+};
+const fmtCur = (pares, {assinado = true} = {}) => pares.length
+  ? pares.map(([c,v])=> (assinado ? (v>0?'+':'−') : '') + sym(c) + ' ' +
+      compact(assinado ? Math.abs(v) : v)).join(' · ')
+  : '—';
 const sign = v => v==null ? 'zero' : (v>0.05 ? 'pos' : v<-0.05 ? 'neg' : 'zero');
 const kind = t => t.cls==='paused' ? 'running' : t.cls;   // "em teste" agrupa rodando + pausado
 const dt = s => s ? new Date(s).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit'}) : null;
@@ -501,11 +541,11 @@ const S = {view:'matriz', res:'', store:'', area:'', scope:'', q:'',
            gStore:'', gGoal:'30'};
 
 /* ---------- matriz ---------- */
-function cellHTML(ts, famName, storeKey) {
+function cellHTML(ts, famName, storeKey, lang) {
   const t = ts[0], k = kind(t);
-  const lab = t.cls==='paused' ? 'Pausado' : RES[t.cls];
+  const lab = RES[lang][t.cls];
   const extra = ts.length>1 ? `<span class="plus">+${ts.length-1}</span>` : '';
-  const title = ts.map(x=>`${x.name} — RPV ${pct(x.rpvL)} (${STATUS[x.status]})`).join('\n');
+  const title = ts.map(x=>`${x.name} — RPV ${pct(x.rpvL)} (${STATUS[lang][x.status]})`).join('\n');
   return `<button class="cell c-${t.cls}" title="${esc(title)}"
       data-fam="${esc(famName)}" data-store="${storeKey}">
       <span class="lab"><i></i>${lab}${extra}</span>
@@ -516,6 +556,27 @@ function obarHTML(c, total) {
   return `<span class="obar">${seg('w',c.winner)}${seg('c',c.control)}${seg('r',c.running)}${seg('i',c.inconclusive)}</span>`;
 }
 function renderMatrix() {
+  const lang = langMatrix();
+  document.getElementById('v-matriz').lang = lang;
+  document.getElementById('mx-eyebrow').textContent = lang==='en' ? 'A/B test' : 'Teste A/B';
+  document.getElementById('mx-h1').innerHTML = lang==='en' ? '<em>Test</em> matrix' : 'Matriz de <em>testes</em>';
+  document.getElementById('lg-winner').textContent = RES[lang].winner;
+  document.getElementById('lg-control').textContent = RES[lang].control;
+  document.getElementById('lg-inconclusive').textContent = RES[lang].inconclusive;
+  document.getElementById('lg-running').textContent = RES[lang].running;
+  document.getElementById('f-res-all').textContent = lang==='en' ? 'All results' : 'Todos os resultados';
+  document.getElementById('f-res-winner').textContent = RES[lang].winner;
+  document.getElementById('f-res-control').textContent = RES[lang].control;
+  document.getElementById('f-res-inconclusive').textContent = RES[lang].inconclusive;
+  document.getElementById('f-res-running').textContent = RES[lang].running;
+  document.getElementById('f-store-all').textContent = lang==='en' ? 'All brands' : 'Todas as marcas';
+  document.getElementById('f-area-all').textContent = lang==='en' ? 'All areas' : 'Todas as áreas';
+  document.querySelectorAll('#f-area option[value]:not([value=""])').forEach(o => { o.textContent = trArea(o.value, lang); });
+  document.getElementById('f-scope-all').textContent = lang==='en' ? 'All' : 'Todas';
+  document.getElementById('f-scope-multi').textContent = lang==='en' ? 'Cross-brand' : 'Multimarca';
+  document.getElementById('f-scope-solo').textContent = lang==='en' ? 'Exclusive' : 'Exclusivas';
+  document.getElementById('f-q').placeholder = lang==='en' ? 'Search family or test…' : 'Buscar família ou teste…';
+
   const cols = S.store ? STORES.filter(s=>s.k===S.store) : STORES;
   const q = S.q.trim().toLowerCase();
   const rows = FAMS.filter(f=>{
@@ -533,76 +594,105 @@ function renderMatrix() {
   });
 
   document.querySelector('#mx thead').innerHTML =
-    `<tr><th>Família de teste</th>${cols.map(s=>`<th>${s.n}</th>`).join('')}</tr>`;
+    `<tr><th>${lang==='en' ? 'Test family' : 'Família de teste'}</th>${cols.map(s=>`<th>${s.n}</th>`).join('')}</tr>`;
   document.querySelector('#mx tbody').innerHTML = rows.length ? rows.map(f=>{
     const n = f.tests.length;
     return `<tr><th>
         <button class="famname" data-fam="${esc(f.name)}">${esc(f.name)}</button>
-        <span class="tags"><span class="tag area">${f.area}</span>
-          <span class="tag n">${f.nStores} ${f.nStores===1?'marca':'marcas'}</span>
-          <span class="tag n">${n} ${n===1?'teste':'testes'}</span></span>
+        <span class="tags"><span class="tag area">${trArea(f.area, lang)}</span>
+          <span class="tag n">${f.nStores} ${lang==='en' ? (f.nStores===1?'brand':'brands') : (f.nStores===1?'marca':'marcas')}</span>
+          <span class="tag n">${n} ${lang==='en' ? (n===1?'test':'tests') : (n===1?'teste':'testes')}</span></span>
         ${obarHTML(f.counts, n)}
       </th>${cols.map(s=> f.byStore[s.k]
-          ? `<td>${cellHTML(f.byStore[s.k], f.name, s.k)}</td>`
+          ? `<td>${cellHTML(f.byStore[s.k], f.name, s.k, lang)}</td>`
           : `<td class="empty">–</td>`).join('')}</tr>`;
-  }).join('') : `<tr><td colspan="${cols.length+1}"><p class="none">Nenhuma família com esses filtros.</p></td></tr>`;
+  }).join('') : `<tr><td colspan="${cols.length+1}"><p class="none">${lang==='en' ? 'No family matches these filters.' : 'Nenhuma família com esses filtros.'}</p></td></tr>`;
 
   const multi = FAMS.filter(f=>f.nStores>1).length;
   const win = FAMS.filter(f=>f.hasWinner).length;
   const cov = FAMS.reduce((a,f)=>a+f.nStores,0) / FAMS.length / STORES.length * 100;
-  document.getElementById('mx-stats').innerHTML =
-    `<b>${FAMS.length}</b> famílias · <b>${multi}</b> testadas em 2+ marcas · <b>${win}</b> com vencedor confirmado · cobertura média <b>${Math.round(cov)}%</b>`
-    + (rows.length!==FAMS.length ? ` — exibindo ${rows.length}` : '');
-  document.getElementById('mx-foot').innerHTML =
-    `<span class="lb">Como ler</span>Cada célula mostra o teste mais recente daquela marca; <b>+n</b> indica testes anteriores da mesma família (passe o mouse para ver todos). O <b>RPV</b> é o lift da melhor variação sobre o controle. A barra sob o nome da família resume os desfechos de todos os seus testes. Clique numa célula ou no nome da família para abrir os testes correspondentes.`;
+  document.getElementById('mx-stats').innerHTML = lang==='en'
+    ? `<b>${FAMS.length}</b> families · <b>${multi}</b> tested in 2+ brands · <b>${win}</b> with confirmed winner · avg. coverage <b>${Math.round(cov)}%</b>`
+      + (rows.length!==FAMS.length ? ` — showing ${rows.length}` : '')
+    : `<b>${FAMS.length}</b> famílias · <b>${multi}</b> testadas em 2+ marcas · <b>${win}</b> com vencedor confirmado · cobertura média <b>${Math.round(cov)}%</b>`
+      + (rows.length!==FAMS.length ? ` — exibindo ${rows.length}` : '');
+  document.getElementById('mx-foot').innerHTML = lang==='en'
+    ? `<span class="lb">How to read</span>Each cell shows that brand's most recent test; <b>+n</b> marks earlier tests from the same family (hover to see them all). <b>RPV</b> is the best variation's lift over control. The bar under the family name summarizes the outcomes of all its tests. Click a cell or the family name to open the matching tests.`
+    : `<span class="lb">Como ler</span>Cada célula mostra o teste mais recente daquela marca; <b>+n</b> indica testes anteriores da mesma família (passe o mouse para ver todos). O <b>RPV</b> é o lift da melhor variação sobre o controle. A barra sob o nome da família resume os desfechos de todos os seus testes. Clique numa célula ou no nome da família para abrir os testes correspondentes.`;
 }
 
 /* ---------- testes ---------- */
-function tileHTML(label, c, v, lift, fmt) {
-  const f = fmt==='brl' ? brl : x => x==null ? '—' : nf2.format(x)+'%';
+function tileHTML(label, c, v, lift, cur) {
+  const f = cur ? x => money(x, cur) : x => x==null ? '—' : nf2.format(x)+'%';
   return `<div class="tile"><h5>${label}</h5>
     <div class="ab num">${f(c)}<em>→</em>${f(v)}</div>
     <div class="lift num ${sign(lift)}">${pct(lift)}</div></div>`;
 }
-function cardHTML(t) {
+function cardHTML(t, lang) {
   const k = kind(t);
-  const dates = t.end ? `${dt(t.start)} → ${dt(t.end)}` : `desde ${dt(t.start)}`;
+  const dates = t.end ? `${dt(t.start)} → ${dt(t.end)}` : `${lang==='en'?'since':'desde'} ${dt(t.start)}`;
   const days = t.end ? Math.round((new Date(t.end)-new Date(t.start))/864e5) : null;
   const p = t.pBest, pc = t.pCtrl;
   const sigTxt = p==null ? '—'
-    : (p>=95 ? 'Significativo' : pc>=95 ? 'Significativo' : 'Sem significância');
+    : (p>=95 || pc>=95) ? (lang==='en'?'Significant':'Significativo') : (lang==='en'?'Not significant':'Sem significância');
   const sigCls = p==null ? 'zero' : (p>=95 ? 'pos' : pc>=95 ? 'neg' : 'zero');
-  const winner = t.cls==='winner' ? `Vencedor: ${t.varName}`
-    : t.cls==='control' ? `Vencedor: ${t.ctrlName}`
-    : t.cls==='inconclusive' ? 'Sem vencedor' : null;
+  const winnerLb = lang==='en' ? 'Winner' : 'Vencedor';
+  const winner = t.cls==='winner' ? `${winnerLb}: ${t.varName}`
+    : t.cls==='control' ? `${winnerLb}: ${t.ctrlName}`
+    : t.cls==='inconclusive' ? (lang==='en'?'No winner':'Sem vencedor') : null;
   return `<article class="card k-${t.cls}">
     <div class="card-h">
       <div>
         <h3>${esc(t.name)}</h3>
         <div class="card-meta"><b>${SN[t.store]}</b><em>·</em>${dates}${days!=null?` <em>(${days}d)</em>`:''}
           <em>·</em>${t.type}<em>·</em>${esc(t.family)}
-          <em>·</em><span class="num">${compact(t.visitors)} visitantes</span>
-          ${t.nvar>2?`<em>·</em>${t.nvar} variações`:''}</div>
+          <em>·</em><span class="num">${compact(t.visitors)} ${lang==='en'?'visitors':'visitantes'}</span>
+          ${t.nvar>2?`<em>·</em>${t.nvar} ${lang==='en'?'variations':'variações'}`:''}</div>
       </div>
       <div class="pills">
-        <span class="pill">${STATUS[t.status]}</span>
+        <span class="pill">${STATUS[lang][t.status]}</span>
         ${winner?`<span class="pill k-${t.cls}">${esc(winner)}</span>`:''}
       </div>
     </div>
     <div class="tiles">
       ${tileHTML('CR', t.crC, t.crV, t.crL)}
-      ${tileHTML('RPV', t.rpvC, t.rpvV, t.rpvL, 'brl')}
-      ${tileHTML('AOV', t.aovC, t.aovV, t.aovL, 'brl')}
+      ${tileHTML('RPV', t.rpvC, t.rpvV, t.rpvL, SC[t.store])}
+      ${tileHTML('AOV', t.aovC, t.aovV, t.aovL, SC[t.store])}
       ${tileHTML('Add to cart', t.atcC, t.atcV, t.atcL)}
-      <div class="tile sig"><h5>Significância</h5>
+      <div class="tile sig"><h5>${lang==='en'?'Significance':'Significância'}</h5>
         <div class="big ${sigCls}">${sigTxt}</div>
-        <div class="ab num">${p==null?'—':`P(melhor) ${nf1.format(p)}%`}</div></div>
-      <div class="tile"><h5>Incremento RPV</h5>
-        <div class="lift num ${sign(t.incr)}" style="margin-top:6px">${t.incr==null?'—':(t.incr>0?'+':'−')+'R$ '+compact(Math.abs(t.incr))}</div>
-        <div class="ab num" style="color:var(--muted)">na variação</div></div>
+        <div class="ab num">${p==null?'—':`P(${lang==='en'?'best':'melhor'}) ${nf1.format(p)}%`}</div></div>
+      <div class="tile"><h5>${lang==='en'?'RPV increment':'Incremento RPV'}</h5>
+        <div class="lift num ${sign(t.incr)}" style="margin-top:6px">${t.incr==null?'—'
+          :(t.incr>0?'+':'−')+sym(SC[t.store])+' '+compact(Math.abs(t.incr))}</div>
+        <div class="ab num" style="color:var(--muted)">${lang==='en'?'on the variation':'na variação'}</div></div>
     </div></article>`;
 }
 function renderTests() {
+  const lang = langTestes();
+  document.getElementById('v-testes').lang = lang;
+  document.getElementById('tt-eyebrow').textContent = lang==='en' ? 'Results' : 'Resultados';
+  document.getElementById('tt-h1').innerHTML = lang==='en' ? '<em>A/B</em> tests' : 'Testes <em>A/B</em>';
+  document.getElementById('t-store-all').textContent = lang==='en' ? 'All brands' : 'Todas as marcas';
+  document.getElementById('t-res-all').textContent = lang==='en' ? 'All results' : 'Todos os resultados';
+  document.getElementById('t-res-winner').textContent = RES[lang].winner;
+  document.getElementById('t-res-control').textContent = RES[lang].control;
+  document.getElementById('t-res-inconclusive').textContent = RES[lang].inconclusive;
+  document.getElementById('t-res-running').textContent = RES[lang].running;
+  document.getElementById('t-status-all').textContent = lang==='en' ? 'All statuses' : 'Todos os status';
+  document.getElementById('t-status-running').textContent = STATUS[lang].Running;
+  document.getElementById('t-status-paused').textContent = STATUS[lang].Paused;
+  document.getElementById('t-status-done').textContent = STATUS[lang].Done;
+  document.getElementById('t-area-all').textContent = lang==='en' ? 'All areas' : 'Todas as áreas';
+  document.querySelectorAll('#t-area option[value]:not([value=""])').forEach(o => { o.textContent = trArea(o.value, lang); });
+  document.getElementById('t-sort-date').textContent = lang==='en' ? 'Sort: date' : 'Ordenar: data';
+  document.getElementById('t-sort-rpv').textContent = lang==='en' ? 'Sort: RPV' : 'Ordenar: RPV';
+  document.getElementById('t-sort-cr').textContent = lang==='en' ? 'Sort: CR' : 'Ordenar: CR';
+  document.getElementById('t-sort-aov').textContent = lang==='en' ? 'Sort: AOV' : 'Ordenar: AOV';
+  document.getElementById('t-sort-incr').textContent = lang==='en' ? 'Sort: increment' : 'Ordenar: incremento';
+  document.getElementById('t-sort-vis').textContent = lang==='en' ? 'Sort: visitors' : 'Ordenar: visitantes';
+  document.getElementById('t-q').placeholder = lang==='en' ? 'Search test…' : 'Buscar teste…';
+
   const q = S.tQ.trim().toLowerCase();
   let list = DATA.filter(t=>{
     if (S.tStore && t.store!==S.tStore) return false;
@@ -618,19 +708,31 @@ function renderTests() {
   list = list.sort((a,b)=> by[S.tSort](b) - by[S.tSort](a));
 
   document.getElementById('tt-cards').innerHTML = list.length
-    ? list.map(cardHTML).join('')
-    : `<p class="none">Nenhum teste com esses filtros.</p>`;
+    ? list.map(t=>cardHTML(t, lang)).join('')
+    : `<p class="none">${lang==='en' ? 'No test matches these filters.' : 'Nenhum teste com esses filtros.'}</p>`;
 
   const avg = (arr,f) => { const v=arr.map(f).filter(x=>x!=null); return v.length? v.reduce((a,b)=>a+b,0)/v.length : null; };
   const fin = list.filter(t=>t.end);
-  const kpis = [
-    ['RPV (lift)',        pct(avg(list,t=>t.rpvL)), `${list.length} testes`, sign(avg(list,t=>t.rpvL))],
-    ['Incremento RPV',    (()=>{const s=list.map(t=>t.incr||0).reduce((a,b)=>a+b,0);
-                            return (s>0?'+':'−')+'R$ '+compact(Math.abs(s));})(),
-                          'soma na variação', sign(list.map(t=>t.incr||0).reduce((a,b)=>a+b,0))],
-    ['CR (lift)',         pct(avg(list,t=>t.crL)),  `${list.length} testes`, sign(avg(list,t=>t.crL))],
-    ['AOV (lift)',        pct(avg(list,t=>t.aovL)), `${list.length} testes`, sign(avg(list,t=>t.aovL))],
-    ['Add to cart (lift)',pct(avg(list,t=>t.atcL)), `${list.length} testes`, sign(avg(list,t=>t.atcL))],
+  const incr = somaCur(list);
+  const testWord = lang==='en' ? ['test','tests'] : ['teste','testes'];
+  const kpis = lang==='en' ? [
+    ['RPV (lift)',        pct(avg(list,t=>t.rpvL)), pl(list.length,...testWord), sign(avg(list,t=>t.rpvL))],
+    ['RPV increment',     fmtCur(incr),
+                          incr.length>1 ? 'sum on the variation, by currency' : 'sum on the variation',
+                          incr.length>1 ? 'moedas' : sign(incr[0]?.[1])],
+    ['CR (lift)',         pct(avg(list,t=>t.crL)),  pl(list.length,...testWord), sign(avg(list,t=>t.crL))],
+    ['AOV (lift)',        pct(avg(list,t=>t.aovL)), pl(list.length,...testWord), sign(avg(list,t=>t.aovL))],
+    ['Add to cart (lift)',pct(avg(list,t=>t.atcL)), pl(list.length,...testWord), sign(avg(list,t=>t.atcL))],
+    ['Avg. duration',     fin.length? Math.round(avg(fin,t=>(new Date(t.end)-new Date(t.start))/864e5))+'d' : '—',
+                          `${fin.length} done`, 'zero'],
+  ] : [
+    ['RPV (lift)',        pct(avg(list,t=>t.rpvL)), pl(list.length,...testWord), sign(avg(list,t=>t.rpvL))],
+    ['Incremento RPV',    fmtCur(incr),
+                          incr.length>1 ? 'soma na variação, por moeda' : 'soma na variação',
+                          incr.length>1 ? 'moedas' : sign(incr[0]?.[1])],
+    ['CR (lift)',         pct(avg(list,t=>t.crL)),  pl(list.length,...testWord), sign(avg(list,t=>t.crL))],
+    ['AOV (lift)',        pct(avg(list,t=>t.aovL)), pl(list.length,...testWord), sign(avg(list,t=>t.aovL))],
+    ['Add to cart (lift)',pct(avg(list,t=>t.atcL)), pl(list.length,...testWord), sign(avg(list,t=>t.atcL))],
     ['Duração média',     fin.length? Math.round(avg(fin,t=>(new Date(t.end)-new Date(t.start))/864e5))+'d' : '—',
                           `${fin.length} finalizados`, 'zero'],
   ];
@@ -638,12 +740,14 @@ function renderTests() {
     `<div class="kpi"><h4>${h}</h4><div class="v num ${c}">${v}</div><div class="n">${n}</div></div>`).join('');
 
   const c = list.reduce((a,t)=>(a[kind(t)]=(a[kind(t)]||0)+1,a),{});
-  document.getElementById('tt-stats').innerHTML =
-    `<b>${list.length}</b> de ${DATA.length} testes · <b>${c.winner||0}</b> vencedores · <b>${c.control||0}</b> controle venceu · <b>${c.inconclusive||0}</b> inconclusivos · <b>${c.running||0}</b> em teste`;
+  document.getElementById('tt-stats').innerHTML = lang==='en'
+    ? `<b>${list.length}</b> of ${DATA.length} tests · <b>${c.winner||0}</b> winners · <b>${c.control||0}</b> control won · <b>${c.inconclusive||0}</b> inconclusive · <b>${c.running||0}</b> running`
+    : `<b>${list.length}</b> de ${DATA.length} testes · <b>${c.winner||0}</b> vencedores · <b>${c.control||0}</b> controle venceu · <b>${c.inconclusive||0}</b> inconclusivos · <b>${c.running||0}</b> em teste`;
   document.getElementById('t-chip').innerHTML = S.tFam
-    ? `<span class="chip">${esc(S.tFam)}<button id="t-clearfam" aria-label="Remover filtro de família">×</button></span>` : '';
-  document.getElementById('tt-foot').innerHTML =
-    `<span class="lb">Critério</span><b>Vencedor</b> = a melhor variação tem ≥95% de probabilidade de ser a melhor em RPV (receita por visitante), a meta de todos os testes. <b>Controle venceu</b> = o controle atinge esse limite. Abaixo disso, <b>inconclusivo</b>. Em testes A/B/C, comparamos a variação de maior RPV contra o controle. Incremento = (RPV variação − RPV controle) × visitantes da variação, no período do teste.`;
+    ? `<span class="chip">${esc(S.tFam)}<button id="t-clearfam" aria-label="${lang==='en'?'Remove family filter':'Remover filtro de família'}">×</button></span>` : '';
+  document.getElementById('tt-foot').innerHTML = lang==='en'
+    ? `<span class="lb">Criteria</span><b>Winner</b> = the best variation has ≥95% probability of being the best in RPV (revenue per visitor), the goal of every test. <b>Control won</b> = the control hits that threshold. Below that, <b>inconclusive</b>. In A/B/C tests, we compare the highest-RPV variation against control. Increment = (variation RPV − control RPV) × variation visitors, within the test window, <b>in the store's currency</b> — no conversion, so totals that cross currencies show broken out by currency.`
+    : `<span class="lb">Critério</span><b>Vencedor</b> = a melhor variação tem ≥95% de probabilidade de ser a melhor em RPV (receita por visitante), a meta de todos os testes. <b>Controle venceu</b> = o controle atinge esse limite. Abaixo disso, <b>inconclusivo</b>. Em testes A/B/C, comparamos a variação de maior RPV contra o controle. Incremento = (RPV variação − RPV controle) × visitantes da variação, no período do teste, <b>na moeda da loja</b> — sem conversão, então totais que cruzam moedas aparecem quebrados por moeda.`;
 }
 
 /* ---------- eventos ---------- */
@@ -716,14 +820,28 @@ document.getElementById('theme').onclick = () => {
 /* ---------- roadmap ---------- */
 const ROADMAP = JSON.parse(document.getElementById('roadmap').textContent);
 const VERT = VNAME;
-const KIND = {ab:'Teste A/B', epic:'Épico', prod:'Produto / infra'};
+const langRoadmap = () => S.rVert === 'jump' ? 'en' : 'pt';
+const KIND = {
+  pt: {ab:'Teste A/B', epic:'Épico', prod:'Produto / infra'},
+  en: {ab:'A/B test',  epic:'Epic',  prod:'Product / infra'},
+};
+// SCLS/SORD comparam contra o valor bruto em português que vem do Jira — não mudam com o
+// idioma. trStatus só troca o que é exibido, nunca o que é comparado/ordenado.
 const SCLS = s => s==='Em andamento' ? 's-run'
   : (s==='Validação'||s==='Code review') ? 's-val'
   : (s==='Bloqueado'||s==='Aguardando cliente') ? 's-blk' : 's-bkl';
 const SORD = {'Em andamento':0,'Validação':1,'Code review':2,'Aguardando cliente':3,'Bloqueado':4,'Backlog':5};
+const STATUS_ROADMAP_EN = {
+  'Em andamento':'In progress', 'Validação':'Validation', 'Code review':'Code review',
+  'Aguardando cliente':'Waiting on client', 'Bloqueado':'Blocked', 'Backlog':'Backlog',
+};
+const trStatus = (raw, lang) => lang === 'en' ? (STATUS_ROADMAP_EN[raw] ?? raw) : raw;
 const R_BRANDS_BY_VERT = VERTS.map(([v]) => [v,
   [...new Set(ROADMAP.filter(r=>r.vert===v && r.brand).map(r=>r.brand))].sort((a,b)=>a.localeCompare(b,'pt-BR'))]);
 const R_STATUS = [...new Set(ROADMAP.map(r=>r.status))].sort((a,b)=>SORD[a]-SORD[b]);
+// Rótulos de marca/optgroup são nomes próprios (Gobeaute/GoJump, nomes de marca) — não mudam de
+// idioma. Só o texto de status é traduzido, e só na exibição (o <option value> continua o dado
+// bruto do Jira, contra o que o filtro compara).
 document.getElementById('r-brand').insertAdjacentHTML('beforeend',
   R_BRANDS_BY_VERT.map(([v,bs])=>`<optgroup label="${VERT[v]}">`
     + bs.map(b=>`<option value="${b}">${b}</option>`).join('') + `</optgroup>`).join(''));
@@ -734,24 +852,38 @@ const famStats = {};
 for (const f of FAMS) famStats[f.name] = {n:f.tests.length, w:f.tests.filter(t=>t.cls==='winner').length,
                                           c:f.tests.filter(t=>t.cls==='control').length, s:f.nStores};
 
-function roadCardHTML(r) {
+function roadCardHTML(r, lang) {
   const cls = SCLS(r.status);
   const fs = r.fam ? famStats[r.fam] : null;
   return `<article class="rcard ${cls}">
     <div>
       <div class="rc-key"><a href="${r.url}" target="_blank" rel="noopener">${r.key}</a>
-        ${r.brand?`<b>${esc(r.brand)}</b>`:`<b>${VERT[r.vert]}</b>`}${r.area!=='—'?`<span class="tag area">${r.area}</span>`:''}
-        ${r.kind!=='ab'?`<span class="tag kind">${KIND[r.kind]}</span>`:''}
-        <span class="st ${cls}" style="margin-left:auto">${r.status}</span></div>
+        ${r.brand?`<b>${esc(r.brand)}</b>`:`<b>${VERT[r.vert]}</b>`}${r.area!=='—'?`<span class="tag area">${trArea(r.area, lang)}</span>`:''}
+        ${r.kind!=='ab'?`<span class="tag kind">${KIND[lang][r.kind]}</span>`:''}
+        <span class="st ${cls}" style="margin-left:auto">${trStatus(r.status, lang)}</span></div>
       <h3 style="margin-top:7px">${esc(r.title)}</h3>
     </div>
     ${r.note?`<p class="rc-note">${esc(r.note)}</p>`:''}
     ${r.blocked?`<p class="rc-block">⚠ ${esc(r.blocked)}</p>`:''}
-    ${fs?`<div class="rc-fam">Já testado: <button data-rfam="${esc(r.fam)}">${esc(r.fam)}</button>
-      — ${fs.n} ${fs.n===1?'teste':'testes'} em ${fs.s} ${fs.s===1?'marca':'marcas'}${fs.w?`, ${fs.w} vencedor${fs.w>1?'es':''}`:''}${fs.c?`, ${fs.c} com controle vencendo`:''}</div>`:''}
+    ${fs?`<div class="rc-fam">${lang==='en'?'Already tested':'Já testado'}: <button data-rfam="${esc(r.fam)}">${esc(r.fam)}</button>
+      — ${lang==='en'
+        ? `${fs.n} ${fs.n===1?'test':'tests'} in ${fs.s} ${fs.s===1?'brand':'brands'}${fs.w?`, ${fs.w} winner${fs.w>1?'s':''}`:''}${fs.c?`, ${fs.c} with control winning`:''}`
+        : `${fs.n} ${fs.n===1?'teste':'testes'} em ${fs.s} ${fs.s===1?'marca':'marcas'}${fs.w?`, ${fs.w} vencedor${fs.w>1?'es':''}`:''}${fs.c?`, ${fs.c} com controle vencendo`:''}`}</div>`:''}
   </article>`;
 }
 function renderRoadmap() {
+  const lang = langRoadmap();
+  document.getElementById('v-roadmap').lang = lang;
+  document.getElementById('rd-eyebrow').textContent = lang==='en' ? 'Up next' : 'Próximos';
+  document.getElementById('rd-h1').innerHTML = lang==='en' ? '<em>Test</em> roadmap' : 'Roadmap de <em>testes</em>';
+  document.getElementById('r-kind-ab').textContent = lang==='en' ? 'A/B tests' : 'Testes A/B';
+  document.getElementById('r-kind-all').textContent = lang==='en' ? 'Everything' : 'Tudo';
+  document.getElementById('r-vert-all').textContent = lang==='en' ? 'All verticals' : 'Todas as verticais';
+  document.getElementById('r-brand-all').textContent = lang==='en' ? 'All brands' : 'Todas as marcas';
+  document.getElementById('r-status-all').textContent = lang==='en' ? 'All statuses' : 'Todos os status';
+  document.querySelectorAll('#r-status option[value]:not([value=""])').forEach(o => { o.textContent = trStatus(o.value, lang); });
+  document.getElementById('r-q').placeholder = lang==='en' ? 'Search test or key…' : 'Buscar teste ou chave…';
+
   const q = S.rQ.trim().toLowerCase();
   const list = ROADMAP.filter(r=>{
     if (S.rKind && r.kind!==S.rKind) return false;
@@ -766,25 +898,42 @@ function renderRoadmap() {
   document.getElementById('rd-body').innerHTML = verts.length ? verts.map(v=>{
     const items = list.filter(r=>r.vert===v);
     const ab = items.filter(r=>r.kind==='ab').length;
+    const n = lang==='en'
+      ? `${items.length} ${items.length===1?'item':'items'}${S.rKind?'':` · ${ab} A/B test${ab===1?'':'s'}`}`
+      : `${items.length} ${items.length===1?'item':'itens'}${S.rKind?'':` · ${ab} teste${ab===1?'':'s'} A/B`}`;
     return `<section class="vert"><div class="vert-h"><h2>${VERT[v]}</h2>
-      <span class="n">${items.length} ${items.length===1?'item':'itens'}${S.rKind?'':` · ${ab} teste${ab===1?'':'s'} A/B`}</span></div>
-      <div class="rgrid">${items.map(roadCardHTML).join('')}</div></section>`;
-  }).join('') : `<p class="none">Nenhum item com esses filtros.</p>`;
+      <span class="n">${n}</span></div>
+      <div class="rgrid">${items.map(r=>roadCardHTML(r, lang)).join('')}</div></section>`;
+  }).join('') : `<p class="none">${lang==='en' ? 'No item matches these filters.' : 'Nenhum item com esses filtros.'}</p>`;
 
   const c = list.reduce((a,r)=>(a[r.status]=(a[r.status]||0)+1,a),{});
-  document.getElementById('rd-stats').innerHTML =
-    `<b>${list.length}</b> de ${ROADMAP.length} itens · ` +
-    R_STATUS.filter(s=>c[s]).map(s=>`<b>${c[s]}</b> ${s.toLowerCase()}`).join(' · ');
-  document.getElementById('rd-foot').innerHTML =
-    `<span class="lb">Fonte</span>Jira — projetos <b>GS (GoBeaute)</b> e <b>JUMP (GoJump)</b>, tudo que não está concluído. Na Gobeaute o filtro é a convenção de nome <b>[AB Marca]</b>; no GoJump o projeto inteiro entra, e cada item é classificado como teste A/B, épico ou produto/infra. Marcas que aparecem aqui e não na matriz (Denavita, Yenzah, POTTD, WAK, FUNEM, LOC, Stiches) ainda não têm teste no Elevate. Clique na chave para abrir o card no Jira.`;
+  document.getElementById('rd-stats').innerHTML = (lang==='en'
+    ? `<b>${list.length}</b> of ${ROADMAP.length} items · `
+    : `<b>${list.length}</b> de ${ROADMAP.length} itens · `) +
+    R_STATUS.filter(s=>c[s]).map(s=>`<b>${c[s]}</b> ${trStatus(s, lang).toLowerCase()}`).join(' · ');
+  document.getElementById('rd-foot').innerHTML = lang==='en'
+    ? `<span class="lb">Source</span>Jira, projects <b>GS (GoBeaute)</b> and <b>JUMP (GoJump)</b>, everything not yet done. On Gobeaute the filter is the <b>[AB Brand]</b> naming convention; on GoJump the whole project comes in, and each item is classified as an A/B test, epic, or product/infra. Brands that show up here but not in the matrix (Denavita, Yenzah, POTTD, WAK, FUNEM, LOC, Stiches) don't have a test in Elevate yet. Click the key to open the card in Jira.`
+    : `<span class="lb">Fonte</span>Jira — projetos <b>GS (GoBeaute)</b> e <b>JUMP (GoJump)</b>, tudo que não está concluído. Na Gobeaute o filtro é a convenção de nome <b>[AB Marca]</b>; no GoJump o projeto inteiro entra, e cada item é classificado como teste A/B, épico ou produto/infra. Marcas que aparecem aqui e não na matriz (Denavita, Yenzah, POTTD, WAK, FUNEM, LOC, Stiches) ainda não têm teste no Elevate. Clique na chave para abrir o card no Jira.`;
 }
 
 
 /* ---------- ganho acumulado ---------- */
 document.getElementById('g-co').innerHTML = VERTS.map(([v,n],i)=>
   `<button data-co="${v}" aria-pressed="${i===0}">${n}</button>`).join('');
-const WEIGHT = {};              // peso da loja = receita observada nos testes
-for (const s of STORES) WEIGHT[s.k] = DATA.filter(t=>t.store===s.k).reduce((a,t)=>a+(t.revenue||0),0);
+// Peso da loja na média da vertical. Receita observada é o peso natural, mas só é comparável
+// dentro de uma mesma moeda — numa vertical que mistura moedas caímos para visitantes, que é
+// adimensional. `baseDoPeso` diz qual dos dois está em uso, para a legenda não mentir.
+const REV = {}, VIS = {};
+for (const s of STORES) {
+  const ts = DATA.filter(t=>t.store===s.k);
+  REV[s.k] = ts.reduce((a,t)=>a+(t.revenue||0), 0);
+  VIS[s.k] = ts.reduce((a,t)=>a+(t.visitors||0), 0);
+}
+const umaMoeda   = ss => new Set(ss.map(s=>s.c||'BRL')).size <= 1;
+const pesosDe    = ss => umaMoeda(ss) ? REV : VIS;
+const baseDoPeso = ss => umaMoeda(ss) ? 'receita observada' : 'visitantes';
+const baseDoPesoEN = ss => baseDoPeso(ss) === 'receita observada' ? 'observed revenue' : 'visitors';
+const langGanho = () => S.gCo === 'jump' ? 'en' : 'pt';
 const winnersOf = k => DATA.filter(t=>t.store===k && t.cls==='winner' && t.rpvL!=null)
   .sort((a,b)=> (a.end||a.start).localeCompare(b.end||b.start));
 const compound = ts => ts.reduce((a,t)=>a*(1+t.rpvL/100), 1);
@@ -798,18 +947,19 @@ function curve(scope) {           // scope: chave de loja ou chave de vertical
       cum: cumOf(scope)};
   }
   const ss = storesOf(scope);
+  const PESO = pesosDe(ss);
   const evts = ss.flatMap(s=>winnersOf(s.k)).sort((a,b)=>(a.end||a.start).localeCompare(b.end||b.start));
-  const W = ss.reduce((a,s)=>a+WEIGHT[s.k], 0) || 1;
+  const W = ss.reduce((a,s)=>a+PESO[s.k], 0) || 1;
   const pts = evts.map((t,i)=>{
     const upto = evts.slice(0, i+1);
     const agg = ss.reduce((a,s)=>
-      a + WEIGHT[s.k] * (compound(upto.filter(x=>x.store===s.k)) - 1) * 100, 0) / W;
+      a + PESO[s.k] * (compound(upto.filter(x=>x.store===s.k)) - 1) * 100, 0) / W;
     return {v:agg, date:t.end||t.start, name:t.name, lift:t.rpvL, store:t.store};
   });
   return {pts, cum: pts.length ? pts[pts.length-1].v : 0};
 }
 
-function mountainSVG(cum, pts, goal, label) {
+function mountainSVG(cum, pts, goal, label, lang) {
   const W=1000, H=520, base=452, top=86, x0=86, xs=612;
   const f = Math.max(0, Math.min(1, cum/goal));
   const P = t => [x0 + t*(xs-x0), base - t*(base-top)];
@@ -819,7 +969,10 @@ function mountainSVG(cum, pts, goal, label) {
     return {...p, x, y, t}; });
   const lab = d => new Date(d).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
   const every = Math.ceil(dots.length/6);
-  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Ganho acumulado de ${nf1.format(cum)}% em direção à meta de ${goal}%">
+  const ariaLabel = lang==='en'
+    ? `Accumulated gain of ${nf1.format(cum)}% towards the ${goal}% goal`
+    : `Ganho acumulado de ${nf1.format(cum)}% em direção à meta de ${goal}%`;
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${ariaLabel}">
     <defs>
       <linearGradient id="climb" x1="0" y1="1" x2="0" y2="0">
         <stop offset="0%" stop-color="var(--loss)" stop-opacity=".05"/>
@@ -842,7 +995,7 @@ function mountainSVG(cum, pts, goal, label) {
     <g>
       <line x1="${xs}" y1="${top}" x2="${xs}" y2="${top-52}" stroke="var(--head)" stroke-width="3.5"/>
       <polygon points="${xs},${top-52} ${xs+44},${top-41} ${xs},${top-30}" fill="var(--head)"/>
-      <text x="${xs+56}" y="${top-34}" font-size="19" font-weight="700" fill="var(--head)">META +${goal}%</text>
+      <text x="${xs+56}" y="${top-34}" font-size="19" font-weight="700" fill="var(--head)">${lang==='en'?'GOAL':'META'} +${goal}%</text>
     </g>
     ${dots.map((d,i)=>`<g><title>${esc(d.name)} — ${pct(d.lift)} (${lab(d.date)})</title>
        <circle cx="${d.x}" cy="${d.y}" r="7.5" fill="var(--surface)" stroke="var(--loss)" stroke-width="3"/>
@@ -854,12 +1007,23 @@ function mountainSVG(cum, pts, goal, label) {
     <g transform="translate(${f>0.8 ? cx-306 : cx+30},${cy-46})">
       <rect width="270" height="74" rx="14" fill="var(--surface)" stroke="var(--line)"/>
       <text x="20" y="34" font-size="26" font-weight="700" fill="var(--loss)">${pct(cum)} RPV</text>
-      <text x="20" y="57" font-size="15" fill="var(--muted)">${esc(label)}${done?' · meta superada':''}</text>
+      <text x="20" y="57" font-size="15" fill="var(--muted)">${esc(label)}${done?(lang==='en'?' · goal reached':' · meta superada'):''}</text>
     </g>
   </svg>`;
 }
 
 function renderGanho() {
+  const lang = langGanho();
+  document.getElementById('v-ganho').lang = lang;
+  document.getElementById('gn-eyebrow').textContent = lang==='en' ? 'Journey' : 'Jornada';
+  document.getElementById('gn-h1').innerHTML = lang==='en' ? 'Accumulated <em>gain</em>' : 'Ganho <em>acumulado</em>';
+  document.getElementById('gn-mtn-h4').textContent = lang==='en' ? 'Path to the top' : 'Jornada até o topo';
+  document.getElementById('g-goal-10').textContent = lang==='en' ? 'Goal +10%' : 'Meta +10%';
+  document.getElementById('g-goal-20').textContent = lang==='en' ? 'Goal +20%' : 'Meta +20%';
+  document.getElementById('g-goal-30').textContent = lang==='en' ? 'Goal +30%' : 'Meta +30%';
+  document.getElementById('g-goal-50').textContent = lang==='en' ? 'Goal +50%' : 'Meta +50%';
+  const byStoreLb = lang==='en' ? 'By store' : 'Por loja';
+
   const co = S.gCo, goal = +S.gGoal;
   const mine = storesOf(co);
   const sel = document.getElementById('g-store');
@@ -876,58 +1040,100 @@ function renderGanho() {
 
   if (!mine.length) {
     const ab = ROADMAP.filter(r=>r.vert===co && r.kind==='ab').length;
-    document.getElementById('gn-chart').innerHTML = `<div class="mtn-empty">
-      ${mountainSVG(0, [], goal, VNAME[co])}
+    document.getElementById('gn-chart').innerHTML = lang==='en' ? `<div class="mtn-empty">
+      ${mountainSVG(0, [], goal, VNAME[co], lang)}
+      <p style="margin-top:18px">No stores in ${VNAME[co]} are connected to Elevate yet,
+      so there's no measured result to accumulate. The roadmap already has <b>${ab} A/B test${ab===1?'':'s'}</b>
+      planned — the track starts once the stores go live in the tool.</p></div>` : `<div class="mtn-empty">
+      ${mountainSVG(0, [], goal, VNAME[co], lang)}
       <p style="margin-top:18px">Nenhuma loja d${co==='jump'?'o':'a'} ${VNAME[co]} está conectada ao Elevate,
       então não há resultado medido para acumular. O roadmap já tem <b>${ab} teste${ab===1?'':'s'} A/B</b>
       planejado${ab===1?'':'s'} — a trilha começa quando as lojas entrarem na ferramenta.</p></div>`;
-    document.getElementById('gn-kpis').innerHTML = ['Ganho acumulado','Vencedores','Incremento','Testes rodados']
-      .map(t=>`<div class="kpi"><h4>${t}</h4><div class="v">—</div><div class="n">sem dados</div></div>`).join('');
+    const emptyKpiLabels = lang==='en'
+      ? ['Accumulated gain','Winners','Increment','Tests run']
+      : ['Ganho acumulado','Vencedores','Incremento','Testes rodados'];
+    document.getElementById('gn-kpis').innerHTML = emptyKpiLabels
+      .map(t=>`<div class="kpi"><h4>${t}</h4><div class="v">—</div><div class="n">${lang==='en'?'no data':'sem dados'}</div></div>`).join('');
     const brands = [...new Set(ROADMAP.filter(r=>r.vert===co && r.brand).map(r=>r.brand))];
-    document.getElementById('gn-rank').innerHTML = `<h4>Por loja</h4>
+    document.getElementById('gn-rank').innerHTML = `<h4>${byStoreLb}</h4>
       <p class="mtn-empty" style="padding:10px 0;text-align:left"><span style="color:var(--muted);font-size:13px">
-      ${brands.join(', ')} entram aqui assim que tiverem token do Elevate.</span></p>`;
-    document.getElementById('gn-stats').innerHTML =
-      `<b>${VNAME[co]}</b> · ${brands.length} marcas no roadmap · nenhuma medida ainda`;
+      ${brands.join(', ')} ${lang==='en' ? 'show up here as soon as they have an Elevate token.' : 'entram aqui assim que tiverem token do Elevate.'}</span></p>`;
+    document.getElementById('gn-stats').innerHTML = lang==='en'
+      ? `<b>${VNAME[co]}</b> · ${brands.length} brands in the roadmap · no data measured yet`
+      : `<b>${VNAME[co]}</b> · ${brands.length} marcas no roadmap · nenhuma medida ainda`;
   } else {
     const {pts, cum} = curve(scope);
-    document.getElementById('gn-chart').innerHTML = mountainSVG(cum, pts, goal, label);
+    document.getElementById('gn-chart').innerHTML = mountainSVG(cum, pts, goal, label, lang);
 
     const pool = isCo ? DATA.filter(t=>mine.some(s=>s.k===t.store)) : DATA.filter(t=>t.store===scope);
     const wins = pool.filter(t=>t.cls==='winner'), ctrls = pool.filter(t=>t.cls==='control');
-    const incr = wins.reduce((a,t)=>a+(t.incr||0),0);
-    const saved = ctrls.reduce((a,t)=>a+(t.incr<0?-t.incr:0),0);
+    const incr  = somaCur(wins);
+    const saved = somaCur(ctrls, t => t.incr < 0 ? -t.incr : 0);
     const done = pool.filter(t=>t.status==='Done').length;
-    document.getElementById('gn-kpis').innerHTML = [
+    const kpis = lang==='en' ? [
+      ['Accumulated gain', pct(cum), `${Math.round(cum/goal*100)}% of goal`, 'pos'],
+      ['Winners', `${wins.length}`, `${done?Math.round(wins.length/done*100):0}% of finished`, ''],
+      ['Measured increment', fmtCur(incr),
+        incr.length>1 ? 'on the winners, by currency' : 'summed on the winners',
+        incr.length>1 ? 'moedas' : 'pos'],
+      ['Loss avoided', fmtCur(saved, {assinado:false}),
+        `${ctrls.length} tests blocked by control`, saved.length>1 ? 'moedas' : ''],
+      ['Tests run', `${pool.length}`, `${done} done`, ''],
+    ] : [
       ['Ganho acumulado', pct(cum), `${Math.round(cum/goal*100)}% da meta`, 'pos'],
       ['Vencedores', `${wins.length}`, `${done?Math.round(wins.length/done*100):0}% dos finalizados`, ''],
-      ['Incremento medido', '+R$ '+compact(incr), 'somado nos vencedores', 'pos'],
-      ['Perda evitada', 'R$ '+compact(saved), `${ctrls.length} testes barrados`, ''],
+      ['Incremento medido', fmtCur(incr),
+        incr.length>1 ? 'nos vencedores, por moeda' : 'somado nos vencedores',
+        incr.length>1 ? 'moedas' : 'pos'],
+      ['Perda evitada', fmtCur(saved, {assinado:false}),
+        `${ctrls.length} testes barrados`, saved.length>1 ? 'moedas' : ''],
       ['Testes rodados', `${pool.length}`, `${done} finalizados`, ''],
-    ].map(([h,v,n,c])=>`<div class="kpi"><h4>${h}</h4><div class="v num ${c}">${v}</div><div class="n">${n}</div></div>`).join('');
+    ];
+    document.getElementById('gn-kpis').innerHTML = kpis
+      .map(([h,v,n,c])=>`<div class="kpi"><h4>${h}</h4><div class="v num ${c}">${v}</div><div class="n">${n}</div></div>`).join('');
 
     const rows = mine.map(s=>({...s, cum:cumOf(s.k), w:winnersOf(s.k).length}))
       .sort((a,b)=>b.cum-a.cum);
     const max = Math.max(...rows.map(r=>r.cum), goal*0.6);
-    document.getElementById('gn-rank').innerHTML = `<h4>Por loja</h4>` + rows.map(r=>
+    document.getElementById('gn-rank').innerHTML = `<h4>${byStoreLb}</h4>` + rows.map(r=>
       `<button class="rrow" data-gstore="${r.k}" aria-current="${scope===r.k}">
         <span class="rname">${r.n}</span>
         <span class="rbar"><i style="width:${Math.max(2, r.cum/max*100)}%"></i></span>
-        <span class="rval"><b>${pct(r.cum)}</b><span>${r.w} vencedor${r.w===1?'':'es'}</span></span>
+        <span class="rval"><b>${pct(r.cum)}</b><span>${lang==='en' ? `${r.w} winner${r.w===1?'':'s'}` : `${r.w} vencedor${r.w===1?'':'es'}`}</span></span>
       </button>`).join('');
 
-    document.getElementById('gn-stats').innerHTML = isCo
-      ? `<b>${VNAME[co]}</b> · ${mine.length} lojas · <b>${wins.length}</b> vencedores compostos · média ponderada por receita observada`
-      : `<b>${label}</b> · <b>${pts.length}</b> vencedores compostos em ordem cronológica`;
+    document.getElementById('gn-stats').innerHTML = lang==='en'
+      ? (isCo
+        ? `<b>${VNAME[co]}</b> · ${mine.length} stores · <b>${wins.length}</b> ${wins.length===1?'compounded winner':'compounded winners'} · weighted average by ${baseDoPesoEN(mine)}`
+        : `<b>${label}</b> · <b>${pts.length}</b> ${pts.length===1?'compounded winner':'compounded winners'} in chronological order`)
+      : (isCo
+        ? `<b>${VNAME[co]}</b> · ${mine.length} lojas · <b>${wins.length}</b> ${wins.length===1?'vencedor composto':'vencedores compostos'} · média ponderada por ${baseDoPeso(mine)}`
+        : `<b>${label}</b> · <b>${pts.length}</b> ${pts.length===1?'vencedor composto':'vencedores compostos'} em ordem cronológica`);
   }
-  document.getElementById('gn-foot').innerHTML = `<span class="lb">Método</span>
+  document.getElementById('gn-foot').innerHTML = lang==='en' ? `<span class="lb">Method</span>
+    Accumulated gain compounds the RPV lifts of tests with a <b>confirmed winner</b> (≥95%), in the order
+    they closed: <b>(1+l₁)×(1+l₂)…−1</b>. This assumes every winner was rolled out to 100% and effects
+    don't overlap — in practice they do, so read it as a <b>ceiling on the gain</b>, not guaranteed
+    revenue. Inconclusive tests and ones where control won don't count. The company view is the
+    <b>weighted average by ${baseDoPesoEN(mine)}</b> of each store in the tests, recalculated at every winner${
+      umaMoeda(mine) ? '' : ' — stores in this vertical bill in different currencies, so the weight ' +
+      'is by visitors, not revenue'}.
+    Money values <b>aren't converted</b>: each store shows in its own currency and totals are broken
+    out by currency.
+    The goal is a reference marker you pick from the selector — it isn't an official target.` : `<span class="lb">Método</span>
     O ganho acumulado compõe os lifts de RPV dos testes com <b>vencedor confirmado</b> (≥95%), em ordem de
     encerramento: <b>(1+l₁)×(1+l₂)…−1</b>. Isso assume que todo vencedor foi escalado a 100% e que os efeitos
     são independentes — na prática eles se sobrepõem, então leia como <b>teto do ganho</b>, não como receita
     garantida. Testes inconclusivos e os que o controle venceu não somam. A visão de empresa é a
-    <b>média ponderada pela receita observada</b> de cada loja nos testes, recalculada a cada vencedor.
+    <b>média ponderada por ${baseDoPeso(mine)}</b> de cada loja nos testes, recalculada a cada vencedor${
+      umaMoeda(mine) ? '' : ' — as lojas desta vertical faturam em moedas diferentes, então o peso ' +
+      'é por visitantes, e não por receita'}.
+    Valores em dinheiro <b>não são convertidos</b>: cada loja aparece na sua moeda e os totais são
+    quebrados por moeda.
     A meta é um marcador de referência que você escolhe no seletor — não é um alvo oficial.`;
 }
 
 renderMatrix(); renderTests(); renderRoadmap(); renderGanho();
 </script>
+</body>
+</html>

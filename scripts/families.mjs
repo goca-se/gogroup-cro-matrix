@@ -31,6 +31,15 @@ export const RULES = [
   [/cupom/i,                                                  'Mensagem de cupom no carrinho',     'CARRINHO'],
   [/continu(e|ar) comprando/i,                                'Remover "continuar comprando"',     'CARRINHO'],
   [/inspira/i,                                                'Fragrância "inspirado em"',         'TEMA'],
+
+  // GoJump — testes nomeados em inglês. Duas armadilhas aqui: as lojas são regionais, então o
+  // sufixo de mercado no nome ("… AU") é a mesma tese em outro país e não pode virar família
+  // própria; e o `type` THEME sequestra a área de testes que são claramente de home.
+  [/Redesign for Pottd/i,                                     'Redesign de tema POTTD',            'TEMA'],
+  [/'?Shop'? button on the homepage/i,                        'Botão "Shop" na home',              'HOME'],
+  [/Add to Cart on the Homepage/i,                            'Add to cart na home',               'HOME'],
+  [/Yarn Selector/i,                                          'Seletor de fio na PDP',             'PDP'],
+  [/Main image/i,                                             'Imagem principal do produto',       'IMAGEM'],
 ];
 
 const AREA_BY_TYPE = { PRODUCT_IMAGE: 'IMAGEM', THEME: 'TEMA', PRICE_PLUS: 'PREÇO', CONTENT: 'PDP' };
@@ -50,19 +59,33 @@ const AREA_BY_WORD = [
   [/imagem|imagens|foto/i,               'IMAGEM'],
 ];
 
-export function areaOf(name, type) {
+// Uma tag explícita no título ganha de tudo: [PDP], [Cart], [Home]...
+const areaByTag = (name) => {
   const lower = name.trim().toLowerCase();
-  // Uma tag explícita no título ganha de tudo: [PDP], [Cart], [Home]...
   for (const [tag, area] of Object.entries(AREA_BY_TAG)) if (lower.includes(tag)) return area;
+  return null;
+};
+
+const areaByRules = (name) => {
   for (const [re, family, area] of RULES) if (re.test(name)) return area;
-  if (AREA_BY_TYPE[type]) return AREA_BY_TYPE[type];
-  for (const [re, area] of AREA_BY_WORD) if (re.test(name)) return area;
-  return 'OUTRO';
+  return null;
+};
+
+const areaFallback = (name, type) =>
+  AREA_BY_TYPE[type] ?? AREA_BY_WORD.find(([re]) => re.test(name))?.[1] ?? 'OUTRO';
+
+export function areaOf(name, type) {
+  return areaByTag(name) ?? areaByRules(name) ?? areaFallback(name, type);
 }
 
 // Devolve { family, area }. Testes que não casam com nenhuma regra viram família própria,
 // com o nome limpo do prefixo entre colchetes.
 export function classify(name, type) {
   for (const [re, family, area] of RULES) if (re.test(name)) return { family, area };
-  return { family: name.trim().replace(/^\[[^\]]+\]\s*/, ''), area: areaOf(name, type) };
+  // RULES já não bateu no loop acima, então pula direto para tag/tipo/palavra em vez de
+  // repetir a varredura de RULES que areaOf() faria.
+  return {
+    family: name.trim().replace(/^\[[^\]]+\]\s*/, ''),
+    area: areaByTag(name) ?? areaFallback(name, type),
+  };
 }

@@ -10,7 +10,7 @@
     "fetch": "npm run fetch:elevate && npm run fetch:jira",
     "build": "node scripts/build.mjs",
     "refresh": "npm run fetch && npm run build",
-    "serve": "node --run build && node -e \"const{createServer}=require('http'),fs=require('fs');createServer((q,s)=>{s.setHeader('content-type','text/html;charset=utf-8');s.end(fs.readFileSync('dist/index.html'))}).listen(4173,()=>console.log('http://localhost:4173'))\""
+    "serve": "npm run build && node -e \"const{createServer}=require('http'),fs=require('fs');createServer((q,s)=>{s.setHeader('content-type','text/html;charset=utf-8');s.end(fs.readFileSync('dist/index.html'))}).listen(4173,()=>console.log('http://localhost:4173'))\""
   },
   "engines": { "node": ">=20" }
 }
