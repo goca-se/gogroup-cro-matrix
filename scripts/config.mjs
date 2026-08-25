@@ -1,13 +1,20 @@
 // Lojas medidas no Elevate. Cada uma precisa de um token `ELEVATE_<KEY>` no ambiente.
-// Para ligar uma loja nova (ex.: GoJump), basta acrescentar a linha aqui e o secret correspondente.
+// Para ligar uma loja nova, basta acrescentar a linha aqui e o secret correspondente.
+// `currency` é a moeda em que a loja fatura — o fetch confere contra o Elevate e avisa se divergir.
+// Valores em dinheiro nunca são somados entre moedas: veja MONEY em src/template.html.
 export const STORES = [
-  { key: 'apice',    name: 'Ápice',     vertical: 'beaute' },
-  { key: 'barbours', name: "Barbour's", vertical: 'beaute' },
-  { key: 'kokeshi',  name: 'Kokeshi',   vertical: 'beaute' },
-  { key: 'rituaria', name: 'Rituária',  vertical: 'beaute' },
-  { key: 'lescent',  name: 'Lescent',   vertical: 'beaute' },
-  // { key: 'pottd',  name: 'POTTD', vertical: 'jump' },
-  // { key: 'wak',    name: 'WAK',   vertical: 'jump' },
+  { key: 'apice',    name: 'Ápice',     vertical: 'beaute', currency: 'BRL' },
+  { key: 'barbours', name: "Barbour's", vertical: 'beaute', currency: 'BRL' },
+  { key: 'kokeshi',  name: 'Kokeshi',   vertical: 'beaute', currency: 'BRL' },
+  { key: 'rituaria', name: 'Rituária',  vertical: 'beaute', currency: 'BRL' },
+  { key: 'lescent',  name: 'Lescent',   vertical: 'beaute', currency: 'BRL' },
+  // GoJump: uma instância do Elevate por região, logo uma loja aqui por região.
+  { key: 'wak_us',   name: 'WAK USA',   vertical: 'jump',   currency: 'USD' },
+  { key: 'pottd_eu', name: 'POTTD EU',  vertical: 'jump',   currency: 'EUR' },
+  { key: 'pottd_uk', name: 'POTTD UK',  vertical: 'jump',   currency: 'GBP' },
+  { key: 'pottd_au', name: 'POTTD AU',  vertical: 'jump',   currency: 'AUD' },
+  { key: 'loc',      name: 'Life of Colour', vertical: 'jump', currency: 'AUD' },
+  // { key: 'wak_eu', name: 'WAK EU', vertical: 'jump', currency: 'EUR' },  // sem token válido ainda
 ];
 
 export const VERTICALS = [

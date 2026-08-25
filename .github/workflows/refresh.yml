@@ -34,11 +34,12 @@ jobs:
           ELEVATE_KOKESHI:  ${{ secrets.ELEVATE_KOKESHI }}
           ELEVATE_RITUARIA: ${{ secrets.ELEVATE_RITUARIA }}
           ELEVATE_LESCENT:  ${{ secrets.ELEVATE_LESCENT }}
-          ELEVATE_POTTD:    ${{ secrets.ELEVATE_POTTD }}
-          ELEVATE_WAK:      ${{ secrets.ELEVATE_WAK }}
-          ELEVATE_FUNEM:    ${{ secrets.ELEVATE_FUNEM }}
+          ELEVATE_WAK_US:   ${{ secrets.ELEVATE_WAK_US }}
+          ELEVATE_WAK_EU:   ${{ secrets.ELEVATE_WAK_EU }}
+          ELEVATE_POTTD_EU: ${{ secrets.ELEVATE_POTTD_EU }}
+          ELEVATE_POTTD_UK: ${{ secrets.ELEVATE_POTTD_UK }}
+          ELEVATE_POTTD_AU: ${{ secrets.ELEVATE_POTTD_AU }}
           ELEVATE_LOC:      ${{ secrets.ELEVATE_LOC }}
-          ELEVATE_STICHES:  ${{ secrets.ELEVATE_STICHES }}
         run: npm run fetch:elevate
 
       - name: Puxar roadmap do Jira
