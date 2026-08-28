@@ -8,6 +8,7 @@ export const STORES = [
   { key: 'kokeshi',  name: 'Kokeshi',   vertical: 'beaute', currency: 'BRL' },
   { key: 'rituaria', name: 'Rituária',  vertical: 'beaute', currency: 'BRL' },
   { key: 'lescent',  name: 'Lescent',   vertical: 'beaute', currency: 'BRL' },
+  { key: 'denavita', name: 'Denavita',  vertical: 'beaute', currency: 'BRL' },
   // GoJump: uma instância do Elevate por região, logo uma loja aqui por região.
   { key: 'wak_us',   name: 'WAK USA',   vertical: 'jump',   currency: 'USD' },
   { key: 'pottd_eu', name: 'POTTD EU',  vertical: 'jump',   currency: 'EUR' },

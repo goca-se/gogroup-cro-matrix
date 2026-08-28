@@ -34,7 +34,7 @@ Configure em *Settings → Secrets and variables → Actions*:
 
 | Secret | Para quê |
 |---|---|
-| `ELEVATE_APICE`, `ELEVATE_BARBOURS`, `ELEVATE_KOKESHI`, `ELEVATE_RITUARIA`, `ELEVATE_LESCENT` | Gobeaute — um token por loja. Só as lojas com token são consultadas. |
+| `ELEVATE_APICE`, `ELEVATE_BARBOURS`, `ELEVATE_KOKESHI`, `ELEVATE_RITUARIA`, `ELEVATE_LESCENT`, `ELEVATE_DENAVITA` | Gobeaute — um token por loja. Só as lojas com token são consultadas. |
 | `ELEVATE_WAK_US`, `ELEVATE_POTTD_EU`, `ELEVATE_POTTD_UK`, `ELEVATE_POTTD_AU`, `ELEVATE_LOC` | GoJump — uma instância do Elevate por região, logo um token por região. |
 | `JIRA_EMAIL`, `JIRA_API_TOKEN` | Roadmap. Sem eles, o `data/roadmap.json` anterior é preservado e o build segue. |
 

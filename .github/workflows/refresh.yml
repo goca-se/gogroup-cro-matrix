@@ -34,6 +34,7 @@ jobs:
           ELEVATE_KOKESHI:  ${{ secrets.ELEVATE_KOKESHI }}
           ELEVATE_RITUARIA: ${{ secrets.ELEVATE_RITUARIA }}
           ELEVATE_LESCENT:  ${{ secrets.ELEVATE_LESCENT }}
+          ELEVATE_DENAVITA: ${{ secrets.ELEVATE_DENAVITA }}
           ELEVATE_WAK_US:   ${{ secrets.ELEVATE_WAK_US }}
           ELEVATE_WAK_EU:   ${{ secrets.ELEVATE_WAK_EU }}
           ELEVATE_POTTD_EU: ${{ secrets.ELEVATE_POTTD_EU }}

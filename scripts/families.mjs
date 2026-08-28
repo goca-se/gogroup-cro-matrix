@@ -23,6 +23,7 @@ export const RULES = [
   [/\[Imagens?\]|Imagem de Produto/i,                          'Imagem de produto',                 'IMAGEM'],
   [/Selo dinâmico|Selos? de prova social|prova social|urgência/i,
                                                               'Prova social / urgência',           'PDP'],
+  [/Product Card.*Review|Review.*Product Card/i,              'Reviews no card de produto',        'COLEÇÃO'],
   [/Review|Judge\.me/i,                                       'Reviews na PDP',                    'PDP'],
   [/Announcement Bar/i,                                       'Banner na announcement bar',        'TEMA'],
   [/ABC de credibilidade|Compare at price|Formatação de preço/i,
