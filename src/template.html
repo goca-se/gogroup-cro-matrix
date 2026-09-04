@@ -329,6 +329,35 @@ tbody tr:hover th,tbody tr:hover td{background:var(--panel)}
 .rval b{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:15px;font-weight:700;
   color:var(--loss);letter-spacing:-.03em}
 .rval span{font-size:11.5px;color:var(--muted)}
+.mrow{border-bottom:1px solid var(--line)}
+.mrow:last-child{border-bottom:0}
+.mrow summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:150px 1fr 150px;
+  align-items:center;gap:14px;padding:10px 2px;border-radius:9px}
+.mrow summary::-webkit-details-marker{display:none}
+.mrow summary:hover{background:var(--panel)}
+.mrow[open] summary .mname{color:var(--loss)}
+.mname{font-size:14px;font-weight:600;color:var(--ink)}
+.mbar{height:10px;border-radius:999px;background:var(--raise);overflow:hidden}
+.mbar i{display:block;height:100%;border-radius:999px;
+  background:linear-gradient(90deg,var(--blue),var(--loss))}
+.mval{display:flex;align-items:baseline;justify-content:flex-end;gap:8px;
+  font-family:var(--mono);font-variant-numeric:tabular-nums}
+.mval b{font-size:14px;font-weight:700;color:var(--loss);letter-spacing:-.02em}
+.mval span{font-size:11px;color:var(--muted);font-family:var(--sans)}
+.mtests{list-style:none;margin:2px 0 12px;padding:0 2px 0 4px;display:flex;flex-direction:column;gap:6px}
+.mtests li{display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--ink-2)}
+.mtname{flex:1;min-width:0}
+.mtlift{font-family:var(--mono);font-variant-numeric:tabular-nums;font-weight:700;font-size:12px}
+.mtable-h{margin:22px 0 12px;font-size:10px;letter-spacing:.28em;text-transform:uppercase;
+  color:var(--muted);font-weight:700}
+.mgrid-wrap{overflow-x:auto}
+.mgrid{display:grid;gap:1px;background:var(--line);border:1px solid var(--line);
+  border-radius:10px;overflow:hidden;font-size:12.5px;min-width:max-content}
+.mgc{background:var(--surface);padding:9px 10px;display:flex;align-items:center}
+.mgh{background:var(--panel);font-size:10px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--muted);font-weight:700}
+.mgc.num{justify-content:center;font-family:var(--mono);font-variant-numeric:tabular-nums;color:var(--ink-2)}
+.mgc.tot{font-weight:700;color:var(--head)}
 [hidden]{display:none!important}
 @media (max-width:720px){
   body{padding:5px}
@@ -463,6 +492,7 @@ tbody tr:hover th,tbody tr:hover td{background:var(--panel)}
     <div id="gn-chart"></div>
   </div>
   <div class="rank" id="gn-rank"></div>
+  <div class="rank" id="gn-months"></div>
   <p class="foot" id="gn-foot"></p>
 </section>
 
@@ -1104,6 +1134,47 @@ function curve(scope) {           // scope: chave de loja ou chave de vertical
   return {pts, cum: pts.length ? pts[pts.length-1].v : 0};
 }
 
+/* ---------- por mês ---------- */
+// Ao contrário do curve() acima (que compõe em ordem de encerramento), aqui o agrupamento e a
+// composição seguem a data de início — é o que faz sentido para "quantos testes começaram em
+// cada mês", e mantém a mesma ordem usada para bucketar e para compor.
+const MESES_PT = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro',
+  'Outubro','Novembro','Dezembro'];
+const MESES_EN = ['January','February','March','April','May','June','July','August','September',
+  'October','November','December'];
+const monthKey   = d => { const dt = new Date(d); return `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}`; };
+const monthLabel = (key, lang) => { const [y,m] = key.split('-'); return `${(lang==='en'?MESES_EN:MESES_PT)[+m-1]} ${y}`; };
+
+function monthlyBreakdown(scope) {
+  const isCoScope = !!VNAME[scope];
+  const ss = isCoScope ? storesOf(scope) : [{k:scope}];
+  const PESO = isCoScope ? pesosDe(ss) : null;
+  const W = isCoScope ? (ss.reduce((a,s)=>a+PESO[s.k], 0) || 1) : null;
+  const evts = ss.flatMap(s=>winnersOf(s.k)).sort((a,b)=>a.start.localeCompare(b.start));
+
+  const runningByStore = {};
+  const months = new Map();
+  evts.forEach(t => {
+    const key = monthKey(t.start);
+    if (!months.has(key)) months.set(key, {key, tests:[]});
+    months.get(key).tests.push(t);
+    runningByStore[t.store] = (runningByStore[t.store] ?? 1) * (1 + t.rpvL/100);
+    months.get(key).cum = isCoScope
+      ? ss.reduce((a,s)=> a + PESO[s.k] * ((runningByStore[s.k] ?? 1) - 1) * 100, 0) / W
+      : (runningByStore[scope] - 1) * 100;
+  });
+  const list = [...months.values()].sort((a,b)=>a.key.localeCompare(b.key));
+
+  const brandTable = isCoScope ? {
+    stores: storesOf(scope),
+    months: list.map(m=>m.key),
+    counts: Object.fromEntries(storesOf(scope).map(s=>
+      [s.k, list.map(m=>m.tests.filter(t=>t.store===s.k).length)])),
+  } : null;
+
+  return {list, brandTable};
+}
+
 function mountainSVG(cum, pts, goal, label, lang) {
   const W=1000, H=520, base=452, top=86, x0=86, xs=612;
   const f = Math.max(0, Math.min(1, cum/goal));
@@ -1203,6 +1274,7 @@ function renderGanho() {
     document.getElementById('gn-rank').innerHTML = `<h4>${byStoreLb}</h4>
       <p class="mtn-empty" style="padding:10px 0;text-align:left"><span style="color:var(--muted);font-size:13px">
       ${brands.join(', ')} ${lang==='en' ? 'show up here as soon as they have an Elevate token.' : 'entram aqui assim que tiverem token do Elevate.'}</span></p>`;
+    document.getElementById('gn-months').innerHTML = '';
     document.getElementById('gn-stats').innerHTML = lang==='en'
       ? `<b>${VNAME[co]}</b> · ${brands.length} brands in the roadmap · no data measured yet`
       : `<b>${VNAME[co]}</b> · ${brands.length} marcas no roadmap · nenhuma medida ainda`;
@@ -1247,6 +1319,43 @@ function renderGanho() {
         <span class="rval"><b>${pct(r.cum)}</b><span>${lang==='en' ? `${r.w} winner${r.w===1?'':'s'}` : `${r.w} vencedor${r.w===1?'':'es'}`}</span></span>
       </button>`).join('');
 
+    const monthsLb = lang==='en' ? 'By month' : 'Por mês';
+    const brandLb  = lang==='en' ? 'By brand, month by month' : 'Por marca, mês a mês';
+    const {list: monthList, brandTable} = monthlyBreakdown(scope);
+    if (!monthList.length) {
+      document.getElementById('gn-months').innerHTML = `<h4>${monthsLb}</h4>
+        <p class="mtn-empty" style="padding:10px 0;text-align:left"><span style="color:var(--muted);font-size:13px">
+        ${lang==='en' ? 'No confirmed winners yet to break down by month.' : 'Ainda não há vencedores confirmados para quebrar por mês.'}</span></p>`;
+    } else {
+      const maxCum = monthList[monthList.length-1].cum;
+      const monthRows = monthList.map((m,i)=> `
+        <details class="mrow"${i===monthList.length-1 ? ' open' : ''}>
+          <summary>
+            <span class="mname">${monthLabel(m.key, lang)}</span>
+            <span class="mbar"><i style="width:${Math.max(2, maxCum ? m.cum/maxCum*100 : 0)}%"></i></span>
+            <span class="mval"><b>${pct(m.cum)}</b><span>${m.tests.length} ${lang==='en'
+              ? (m.tests.length===1?'test':'tests') : (m.tests.length===1?'teste':'testes')}</span></span>
+          </summary>
+          <ul class="mtests">${m.tests.map(t=>
+            `<li><span class="tag n">${esc(SN[t.store])}</span><span class="mtname">${esc(t.name)}</span>
+              <span class="mtlift ${t.rpvL>=0?'pos':'neg'}">${pct(t.rpvL)}</span></li>`).join('')}</ul>
+        </details>`).join('');
+      const brandRows = brandTable ? `<div class="mtable-h">${brandLb}</div>
+        <div class="mgrid-wrap"><div class="mgrid" style="grid-template-columns:140px repeat(${brandTable.stores.length},1fr) 70px">
+          <span class="mgc mgh">${lang==='en'?'Month':'Mês'}</span>
+          ${brandTable.stores.map(s=>`<span class="mgc mgh">${esc(s.n)}</span>`).join('')}
+          <span class="mgc mgh">Total</span>
+          ${brandTable.months.map((mk,i)=>{
+            const counts = brandTable.stores.map(s=>brandTable.counts[s.k][i]);
+            const total = counts.reduce((a,b)=>a+b, 0);
+            return `<span class="mgc">${monthLabel(mk, lang)}</span>
+              ${counts.map(c=>`<span class="mgc num">${c||'–'}</span>`).join('')}
+              <span class="mgc num tot">${total}</span>`;
+          }).join('')}
+        </div></div>` : '';
+      document.getElementById('gn-months').innerHTML = `<h4>${monthsLb}</h4>${monthRows}${brandRows}`;
+    }
+
     document.getElementById('gn-stats').innerHTML = lang==='en'
       ? (isCo
         ? `<b>${VNAME[co]}</b> · ${mine.length} stores · <b>${wins.length}</b> ${wins.length===1?'compounded winner':'compounded winners'} · weighted average by ${baseDoPesoEN(mine)}`
@@ -1265,7 +1374,9 @@ function renderGanho() {
       'is by visitors, not revenue'}.
     Money values <b>aren't converted</b>: each store shows in its own currency and totals are broken
     out by currency.
-    The goal is a reference marker you pick from the selector — it isn't an official target.` : `<span class="lb">Método</span>
+    The goal is a reference marker you pick from the selector — it isn't an official target.
+    <b>By month</b> groups the same winners by <b>start date</b> instead of closing date, so its running
+    total can differ slightly from the chart above at the edges of the period.` : `<span class="lb">Método</span>
     O ganho acumulado compõe os lifts de RPV dos testes com <b>vencedor confirmado</b> (≥95%), em ordem de
     encerramento: <b>(1+l₁)×(1+l₂)…−1</b>. Isso assume que todo vencedor foi escalado a 100% e que os efeitos
     são independentes — na prática eles se sobrepõem, então leia como <b>teto do ganho</b>, não como receita
@@ -1275,7 +1386,9 @@ function renderGanho() {
       'é por visitantes, e não por receita'}.
     Valores em dinheiro <b>não são convertidos</b>: cada loja aparece na sua moeda e os totais são
     quebrados por moeda.
-    A meta é um marcador de referência que você escolhe no seletor — não é um alvo oficial.`;
+    A meta é um marcador de referência que você escolhe no seletor — não é um alvo oficial.
+    O bloco <b>Por mês</b> agrupa os mesmos vencedores pela <b>data de início</b> em vez da data de
+    encerramento, então o acumulado ali pode diferir um pouco do gráfico acima nas bordas do período.`;
 }
 
 renderMatrix(); renderTests(); renderRoadmap(); renderGanho();
