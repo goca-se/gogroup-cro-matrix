@@ -11,6 +11,7 @@ export const STORES = [
   { key: 'denavita', name: 'Denavita',  vertical: 'beaute', currency: 'BRL' },
   // GoJump: uma instância do Elevate por região, logo uma loja aqui por região.
   { key: 'wak_us',   name: 'WAK USA',   vertical: 'jump',   currency: 'USD' },
+  { key: 'pottd_us', name: 'POTTD US',  vertical: 'jump',   currency: 'USD' },
   { key: 'pottd_eu', name: 'POTTD EU',  vertical: 'jump',   currency: 'EUR' },
   { key: 'pottd_uk', name: 'POTTD UK',  vertical: 'jump',   currency: 'GBP' },
   { key: 'pottd_au', name: 'POTTD AU',  vertical: 'jump',   currency: 'AUD' },
