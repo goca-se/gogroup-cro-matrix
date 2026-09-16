@@ -347,6 +347,10 @@ tbody tr:hover th,tbody tr:hover td{background:var(--panel)}
     <button role="tab" data-view="roadmap" aria-selected="false">Roadmap</button>
   </nav>
   <div class="stamp"><i></i><span id="stamp"></span></div>
+  <div class="seg" id="langsel" role="group" aria-label="Idioma">
+    <button type="button" data-lang="pt" aria-pressed="true">PT</button>
+    <button type="button" data-lang="en" aria-pressed="false">EN</button>
+  </div>
   <button class="themebtn" id="theme" title="Alternar tema" aria-label="Alternar tema">◐</button>
 </header>
 
@@ -486,13 +490,11 @@ const VERTS   = JSON.parse(document.getElementById('verts').textContent);
 const UPDATED = JSON.parse(document.getElementById('updated').textContent);
 const VNAME   = Object.fromEntries(VERTS);
 const storesOf = v => STORES.filter(s=>s.v===v);
-const vertOf = (storeKey) => STORES.find(s=>s.k===storeKey)?.v;
 const SN = Object.fromEntries(STORES.map(s=>[s.k,s.n]));
-// Cada aba escolhe seu próprio idioma a partir do seu próprio filtro (não existe uma vertical
-// global): Matriz/Testes olham a loja selecionada, Ganho olha o toggle de vertical, Roadmap olha
-// o filtro de vertical. Quando o filtro mistura as duas verticais, fica em português (padrão).
-const langMatrix  = () => (S.store.length  && S.store.every(k=>vertOf(k)==='jump'))  ? 'en' : 'pt';
-const langTestes  = () => (S.tStore.length && S.tStore.every(k=>vertOf(k)==='jump')) ? 'en' : 'pt';
+// Idioma da interface é uma escolha explícita (seletor PT/EN no header, ver S.lang), não mais
+// adivinhado pela marca selecionada.
+const langMatrix  = () => S.lang;
+const langTestes  = () => S.lang;
 const RES = {
   pt: {winner:'Vencedor', control:'Controle venceu', inconclusive:'Inconclusivo', running:'Em teste', paused:'Pausado'},
   en: {winner:'Winner',   control:'Control won',      inconclusive:'Inconclusive', running:'Running',  paused:'Paused'},
@@ -618,11 +620,17 @@ document.getElementById('stamp').textContent =
       {day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'}) : '—'}`;
 
 /* ---------- estado ---------- */
+// Idioma da interface — escolha explícita da pessoa usando, salva no localStorage para
+// sobreviver a um F5. Antes disso o idioma era adivinhado a partir da marca selecionada
+// (GoJump em inglês, o resto em português); agora é sempre o que a pessoa escolher aqui.
+let savedLang = 'pt';
+try { const l = localStorage.getItem('cro-matrix.lang'); if (l === 'pt' || l === 'en') savedLang = l; } catch {}
+
 const S = {view:'matriz', res:'', store:fStoreMsel.value, area:'', scope:'', q:'',
            tStore:tStoreMsel.value, tRes:'', tStatus:'', tArea:'', tSort:'date', tQ:'', tFam:'',
            rKind:'ab', rVert:'', rBrand:[], rStatus:'', rQ:'',
            gCo:JSON.parse(document.getElementById('verts').textContent)[0][0],
-           gStore:'', gGoal:'30'};
+           gStore:'', gGoal:'30', lang:savedLang};
 
 /* ---------- matriz ---------- */
 function cellHTML(ts, famName, storeKey, lang) {
@@ -929,11 +937,20 @@ document.getElementById('theme').onclick = () => {
   const dark = cur ? cur==='dark' : matchMedia('(prefers-color-scheme:dark)').matches;
   document.documentElement.setAttribute('data-theme', dark ? 'light' : 'dark');
 };
+const langsel = document.getElementById('langsel');
+[...langsel.children].forEach(b => b.setAttribute('aria-pressed', String(b.dataset.lang===S.lang)));
+langsel.onclick = e => {
+  const b = e.target.closest('button'); if (!b || b.dataset.lang===S.lang) return;
+  S.lang = b.dataset.lang;
+  try { localStorage.setItem('cro-matrix.lang', S.lang); } catch {}
+  [...langsel.children].forEach(x=>x.setAttribute('aria-pressed', String(x===b)));
+  renderMatrix(); renderTests(); renderRoadmap(); renderGanho();
+};
 
 /* ---------- roadmap ---------- */
 const ROADMAP = JSON.parse(document.getElementById('roadmap').textContent);
 const VERT = VNAME;
-const langRoadmap = () => S.rVert === 'jump' ? 'en' : 'pt';
+const langRoadmap = () => S.lang;
 const KIND = {
   pt: {ab:'Teste A/B', epic:'Épico', prod:'Produto / infra'},
   en: {ab:'A/B test',  epic:'Epic',  prod:'Product / infra'},
@@ -1048,7 +1065,7 @@ const umaMoeda   = ss => new Set(ss.map(s=>s.c||'BRL')).size <= 1;
 const pesosDe    = ss => umaMoeda(ss) ? REV : VIS;
 const baseDoPeso = ss => umaMoeda(ss) ? 'receita observada' : 'visitantes';
 const baseDoPesoEN = ss => baseDoPeso(ss) === 'receita observada' ? 'observed revenue' : 'visitors';
-const langGanho = () => S.gCo === 'jump' ? 'en' : 'pt';
+const langGanho = () => S.lang;
 const winnersOf = k => DATA.filter(t=>t.store===k && t.cls==='winner' && t.rpvL!=null)
   .sort((a,b)=> (a.end||a.start).localeCompare(b.end||b.start));
 const compound = ts => ts.reduce((a,t)=>a*(1+t.rpvL/100), 1);
