@@ -230,7 +230,11 @@ tbody tr:hover th,tbody tr:hover td{background:var(--panel)}
   align-items:center}
 .card-meta b{color:var(--head);font-weight:600}
 .card-meta em{font-style:normal;opacity:.45}
-.pills{display:flex;gap:7px;flex-wrap:wrap;flex:none}
+.pills{display:flex;gap:7px;flex-wrap:wrap;flex:none;align-items:center}
+.card-link{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;
+  border-radius:999px;border:1px solid var(--line-2);color:var(--muted);text-decoration:none;
+  font-size:14px;line-height:1;flex:none}
+.card-link:hover{color:var(--blue);border-color:var(--blue)}
 .pill{font-size:11px;font-weight:600;padding:5px 12px;border-radius:999px;border:1px solid var(--line);
   color:var(--muted);white-space:nowrap}
 .pill.k-winner{background:var(--win-bg);border-color:var(--win-line);color:var(--win)}
@@ -744,6 +748,9 @@ function cardHTML(t, lang) {
       <div class="pills">
         <span class="pill">${STATUS[lang][t.status]}</span>
         ${winner?`<span class="pill k-${t.cls}">${esc(winner)}</span>`:''}
+        ${t.testId?`<a class="card-link" href="https://elevateab.app/${t.testId}/results" target="_blank"
+          rel="noopener" title="${lang==='en'?'Open in Elevate':'Abrir no Elevate'}"
+          aria-label="${lang==='en'?'Open in Elevate':'Abrir no Elevate'}">↗</a>`:''}
       </div>
     </div>
     <div class="tiles">
