@@ -143,8 +143,18 @@ main{max-width:1580px;margin:0 auto;padding:26px 22px 80px}
 .chip button:hover{opacity:1}
 
 /* ---------- matriz ---------- */
-.tablewrap{overflow:auto;max-height:min(640px, calc(100vh - 260px));background:var(--surface);
-  border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+.tablewrap{overflow:auto;max-height:min(560px, calc(100vh - 340px));background:var(--surface);
+  border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);
+  scrollbar-width:auto;scrollbar-color:var(--line-2) var(--panel)}
+/* Barra de rolagem sempre visível e "clicável" — no macOS, o padrão do sistema é uma barra
+   fina que só aparece durante o gesto de scroll, o que esconde que dá pra arrastar pro lado.
+   Estilizar ::-webkit-scrollbar força o estilo clássico (sempre visível) no Chrome/Safari. */
+.tablewrap::-webkit-scrollbar{width:14px;height:14px}
+.tablewrap::-webkit-scrollbar-track{background:var(--panel)}
+.tablewrap::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:999px;
+  border:3px solid var(--panel)}
+.tablewrap::-webkit-scrollbar-thumb:hover{background:var(--muted)}
+.tablewrap::-webkit-scrollbar-corner{background:var(--panel)}
 table{border-collapse:separate;border-spacing:0;width:100%;min-width:1040px}
 thead th{position:sticky;top:0;z-index:12;background:var(--panel);
   border-bottom:1px solid var(--line);padding:14px;text-align:center;
@@ -318,7 +328,7 @@ tbody tr:hover th,tbody tr:hover td{background:var(--panel)}
   main{padding:20px 14px 64px}
   .pagehead h1{font-size:25px}
   .search{margin-left:0}
-  .tablewrap{max-height:min(520px, calc(100vh - 210px))}
+  .tablewrap{max-height:min(440px, calc(100vh - 280px))}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 
