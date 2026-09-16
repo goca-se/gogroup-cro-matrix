@@ -37,6 +37,7 @@ jobs:
           ELEVATE_DENAVITA: ${{ secrets.ELEVATE_DENAVITA }}
           ELEVATE_WAK_US:   ${{ secrets.ELEVATE_WAK_US }}
           ELEVATE_WAK_EU:   ${{ secrets.ELEVATE_WAK_EU }}
+          ELEVATE_POTTD_US: ${{ secrets.ELEVATE_POTTD_US }}
           ELEVATE_POTTD_EU: ${{ secrets.ELEVATE_POTTD_EU }}
           ELEVATE_POTTD_UK: ${{ secrets.ELEVATE_POTTD_UK }}
           ELEVATE_POTTD_AU: ${{ secrets.ELEVATE_POTTD_AU }}
