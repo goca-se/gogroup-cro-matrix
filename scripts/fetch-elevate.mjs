@@ -34,7 +34,7 @@ function shape(store, test, results, sig) {
   const { family, area } = classify(test.name, test.type);
 
   return {
-    store, name: test.name.trim(), family, area, type: test.type, status: test.status, cls,
+    store, testId: test.testId, name: test.name.trim(), family, area, type: test.type, status: test.status, cls,
     goal: test.goal, start: test.startingAt, end: test.completedAt, nvar: variations.length,
     sigStatus: sig?.statisticalStatus ?? null, pBest, pCtrl,
     ctrlName: control?.variationName ?? null, varName: best?.variationName ?? null,
