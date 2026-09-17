@@ -1150,20 +1150,29 @@ function monthlyBreakdown(scope) {
   const ss = isCoScope ? storesOf(scope) : [{k:scope}];
   const PESO = isCoScope ? pesosDe(ss) : null;
   const W = isCoScope ? (ss.reduce((a,s)=>a+PESO[s.k], 0) || 1) : null;
-  const evts = ss.flatMap(s=>winnersOf(s.k)).sort((a,b)=>a.start.localeCompare(b.start));
+  // A contagem e a lista do mês trazem todo teste criado, não só os vencedores — dá o volume real
+  // de experimentação. O ganho acumulado (%) continua vindo só dos vencedores confirmados, então
+  // um mês sem vencedor mantém o acumulado do mês anterior em vez de zerar.
+  const pool = ss.flatMap(s=>DATA.filter(t=>t.store===s.k && t.start))
+    .sort((a,b)=>a.start.localeCompare(b.start));
 
-  const runningByStore = {};
   const months = new Map();
-  evts.forEach(t => {
+  pool.forEach(t => {
     const key = monthKey(t.start);
     if (!months.has(key)) months.set(key, {key, tests:[]});
     months.get(key).tests.push(t);
-    runningByStore[t.store] = (runningByStore[t.store] ?? 1) * (1 + t.rpvL/100);
-    months.get(key).cum = isCoScope
-      ? ss.reduce((a,s)=> a + PESO[s.k] * ((runningByStore[s.k] ?? 1) - 1) * 100, 0) / W
-      : (runningByStore[scope] - 1) * 100;
   });
   const list = [...months.values()].sort((a,b)=>a.key.localeCompare(b.key));
+
+  const runningByStore = {};
+  list.forEach(m => {
+    m.tests.filter(t=>t.cls==='winner' && t.rpvL!=null).forEach(t => {
+      runningByStore[t.store] = (runningByStore[t.store] ?? 1) * (1 + t.rpvL/100);
+    });
+    m.cum = isCoScope
+      ? ss.reduce((a,s)=> a + PESO[s.k] * ((runningByStore[s.k] ?? 1) - 1) * 100, 0) / W
+      : ((runningByStore[scope] ?? 1) - 1) * 100;
+  });
 
   const brandTable = isCoScope ? {
     stores: storesOf(scope),
@@ -1325,7 +1334,7 @@ function renderGanho() {
     if (!monthList.length) {
       document.getElementById('gn-months').innerHTML = `<h4>${monthsLb}</h4>
         <p class="mtn-empty" style="padding:10px 0;text-align:left"><span style="color:var(--muted);font-size:13px">
-        ${lang==='en' ? 'No confirmed winners yet to break down by month.' : 'Ainda não há vencedores confirmados para quebrar por mês.'}</span></p>`;
+        ${lang==='en' ? 'No tests yet to break down by month.' : 'Ainda não há testes para quebrar por mês.'}</span></p>`;
     } else {
       const maxCum = monthList[monthList.length-1].cum;
       const monthRows = monthList.map((m,i)=> `
@@ -1336,9 +1345,13 @@ function renderGanho() {
             <span class="mval"><b>${pct(m.cum)}</b><span>${m.tests.length} ${lang==='en'
               ? (m.tests.length===1?'test':'tests') : (m.tests.length===1?'teste':'testes')}</span></span>
           </summary>
-          <ul class="mtests">${m.tests.map(t=>
-            `<li><span class="tag n">${esc(SN[t.store])}</span><span class="mtname">${esc(t.name)}</span>
-              <span class="mtlift ${t.rpvL>=0?'pos':'neg'}">${pct(t.rpvL)}</span></li>`).join('')}</ul>
+          <ul class="mtests">${m.tests.map(t=>{
+            const isWinner = t.cls==='winner' && t.rpvL!=null;
+            const val = isWinner ? pct(t.rpvL) : (RES[lang][t.cls] ?? t.cls);
+            const cls = isWinner ? (t.rpvL>=0?'pos':'neg') : 'zero';
+            return `<li><span class="tag n">${esc(SN[t.store])}</span><span class="mtname">${esc(t.name)}</span>
+              <span class="mtlift ${cls}">${val}</span></li>`;
+          }).join('')}</ul>
         </details>`).join('');
       const brandRows = brandTable ? `<div class="mtable-h">${brandLb}</div>
         <div class="mgrid-wrap"><div class="mgrid" style="grid-template-columns:140px repeat(${brandTable.stores.length},1fr) 70px">
@@ -1375,8 +1388,9 @@ function renderGanho() {
     Money values <b>aren't converted</b>: each store shows in its own currency and totals are broken
     out by currency.
     The goal is a reference marker you pick from the selector — it isn't an official target.
-    <b>By month</b> groups the same winners by <b>start date</b> instead of closing date, so its running
-    total can differ slightly from the chart above at the edges of the period.` : `<span class="lb">Método</span>
+    <b>By month</b> counts every test created that month, grouped by <b>start date</b>; only confirmed
+    winners feed the accumulated % shown there, so a month can show tests without moving that number,
+    and the running total can differ slightly from the chart above at the edges of the period.` : `<span class="lb">Método</span>
     O ganho acumulado compõe os lifts de RPV dos testes com <b>vencedor confirmado</b> (≥95%), em ordem de
     encerramento: <b>(1+l₁)×(1+l₂)…−1</b>. Isso assume que todo vencedor foi escalado a 100% e que os efeitos
     são independentes — na prática eles se sobrepõem, então leia como <b>teto do ganho</b>, não como receita
@@ -1387,8 +1401,9 @@ function renderGanho() {
     Valores em dinheiro <b>não são convertidos</b>: cada loja aparece na sua moeda e os totais são
     quebrados por moeda.
     A meta é um marcador de referência que você escolhe no seletor — não é um alvo oficial.
-    O bloco <b>Por mês</b> agrupa os mesmos vencedores pela <b>data de início</b> em vez da data de
-    encerramento, então o acumulado ali pode diferir um pouco do gráfico acima nas bordas do período.`;
+    O bloco <b>Por mês</b> conta todo teste criado naquele mês, agrupado pela <b>data de início</b>;
+    só os vencedores confirmados entram no % acumulado ali mostrado, então um mês pode ter testes sem
+    mexer nesse número, e o acumulado pode diferir um pouco do gráfico acima nas bordas do período.`;
 }
 
 renderMatrix(); renderTests(); renderRoadmap(); renderGanho();
