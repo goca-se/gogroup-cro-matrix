@@ -120,6 +120,21 @@ main{max-width:1580px;margin:0 auto;padding:26px 22px 80px}
 .search input{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:999px;
   padding:9px 16px;font-size:13px}
 .search input::placeholder{color:var(--muted)}
+.msel{position:relative}
+.msel .msel-btn{appearance:none;background:var(--surface);border:1px solid var(--line);border-radius:999px;
+  padding:9px 34px 9px 16px;font-size:13px;font-weight:500;cursor:pointer;min-width:136px;text-align:left}
+.msel .msel-btn:hover{border-color:var(--blue)}
+.msel-panel{position:absolute;top:calc(100% + 6px);left:0;z-index:50;min-width:230px;max-height:320px;
+  overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:14px;
+  padding:7px;box-shadow:var(--shadow)}
+.msel-row{display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:9px;font-size:13px;
+  cursor:pointer;white-space:nowrap}
+.msel-row:hover{background:var(--panel)}
+.msel-row input{margin:0;flex:none;accent-color:var(--blue)}
+.msel-all{font-weight:600;border-bottom:1px solid var(--line);margin-bottom:5px;padding-bottom:9px}
+.msel-group{margin-top:2px}
+.msel-glabel{display:block;padding:8px 9px 3px;font-size:10.5px;font-weight:700;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--muted)}
 .chip{display:inline-flex;align-items:center;gap:7px;background:var(--blue);color:var(--surface);
   border-radius:999px;padding:6px 8px 6px 14px;font-size:12px;font-weight:600}
 :root[data-theme="dark"] .chip,:root:not([data-theme="light"]) .chip{color:#0F1722}
@@ -128,10 +143,20 @@ main{max-width:1580px;margin:0 auto;padding:26px 22px 80px}
 .chip button:hover{opacity:1}
 
 /* ---------- matriz ---------- */
-.tablewrap{overflow-x:auto;background:var(--surface);border:1px solid var(--line);
-  border-radius:var(--r);box-shadow:var(--shadow)}
+.tablewrap{overflow:auto;max-height:min(560px, calc(100vh - 340px));background:var(--surface);
+  border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);
+  scrollbar-width:auto;scrollbar-color:var(--line-2) var(--panel)}
+/* Barra de rolagem sempre visível e "clicável" — no macOS, o padrão do sistema é uma barra
+   fina que só aparece durante o gesto de scroll, o que esconde que dá pra arrastar pro lado.
+   Estilizar ::-webkit-scrollbar força o estilo clássico (sempre visível) no Chrome/Safari. */
+.tablewrap::-webkit-scrollbar{width:14px;height:14px}
+.tablewrap::-webkit-scrollbar-track{background:var(--panel)}
+.tablewrap::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:999px;
+  border:3px solid var(--panel)}
+.tablewrap::-webkit-scrollbar-thumb:hover{background:var(--muted)}
+.tablewrap::-webkit-scrollbar-corner{background:var(--panel)}
 table{border-collapse:separate;border-spacing:0;width:100%;min-width:1040px}
-thead th{position:sticky;top:71px;z-index:12;background:var(--panel);
+thead th{position:sticky;top:0;z-index:12;background:var(--panel);
   border-bottom:1px solid var(--line);padding:14px;text-align:center;
   font-size:14px;font-weight:700;color:var(--head);white-space:nowrap;letter-spacing:-.01em}
 thead th:first-child{left:0;z-index:14;text-align:left;text-transform:uppercase;
@@ -205,7 +230,11 @@ tbody tr:hover th,tbody tr:hover td{background:var(--panel)}
   align-items:center}
 .card-meta b{color:var(--head);font-weight:600}
 .card-meta em{font-style:normal;opacity:.45}
-.pills{display:flex;gap:7px;flex-wrap:wrap;flex:none}
+.pills{display:flex;gap:7px;flex-wrap:wrap;flex:none;align-items:center}
+.card-link{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;
+  border-radius:999px;border:1px solid var(--line-2);color:var(--muted);text-decoration:none;
+  font-size:14px;line-height:1;flex:none}
+.card-link:hover{color:var(--blue);border-color:var(--blue)}
 .pill{font-size:11px;font-weight:600;padding:5px 12px;border-radius:999px;border:1px solid var(--line);
   color:var(--muted);white-space:nowrap}
 .pill.k-winner{background:var(--win-bg);border-color:var(--win-line);color:var(--win)}
@@ -303,7 +332,7 @@ tbody tr:hover th,tbody tr:hover td{background:var(--panel)}
   main{padding:20px 14px 64px}
   .pagehead h1{font-size:25px}
   .search{margin-left:0}
-  thead th{top:62px}
+  .tablewrap{max-height:min(440px, calc(100vh - 280px))}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 
@@ -322,6 +351,10 @@ tbody tr:hover th,tbody tr:hover td{background:var(--panel)}
     <button role="tab" data-view="roadmap" aria-selected="false">Roadmap</button>
   </nav>
   <div class="stamp"><i></i><span id="stamp"></span></div>
+  <div class="seg" id="langsel" role="group" aria-label="Idioma">
+    <button type="button" data-lang="pt" aria-pressed="true">PT</button>
+    <button type="button" data-lang="en" aria-pressed="false">EN</button>
+  </div>
   <button class="themebtn" id="theme" title="Alternar tema" aria-label="Alternar tema">◐</button>
 </header>
 
@@ -348,7 +381,10 @@ tbody tr:hover th,tbody tr:hover td{background:var(--panel)}
       <option id="f-res-inconclusive" value="inconclusive">Inconclusivo</option>
       <option id="f-res-running" value="running">Em teste</option>
     </select></div>
-    <div class="field"><select id="f-store"><option id="f-store-all" value="">Todas as marcas</option></select></div>
+    <div class="field msel">
+      <button type="button" class="msel-btn" id="f-store-btn" aria-haspopup="true" aria-expanded="false"></button>
+      <div class="msel-panel" id="f-store-panel" hidden></div>
+    </div>
     <div class="field"><select id="f-area"><option id="f-area-all" value="">Todas as áreas</option></select></div>
     <div class="seg" id="f-scope">
       <button id="f-scope-all" data-scope="" aria-pressed="true">Todas</button>
@@ -367,7 +403,10 @@ tbody tr:hover th,tbody tr:hover td{background:var(--panel)}
   </div>
   <div class="kpis" id="tt-kpis"></div>
   <div class="controls">
-    <div class="field"><select id="t-store"><option id="t-store-all" value="">Todas as marcas</option></select></div>
+    <div class="field msel">
+      <button type="button" class="msel-btn" id="t-store-btn" aria-haspopup="true" aria-expanded="false"></button>
+      <div class="msel-panel" id="t-store-panel" hidden></div>
+    </div>
     <div class="field"><select id="t-res">
       <option id="t-res-all" value="">Todos os resultados</option>
       <option id="t-res-winner" value="winner">Vencedor</option>
@@ -435,7 +474,10 @@ tbody tr:hover th,tbody tr:hover td{background:var(--panel)}
       <option value="beaute">Gobeaute</option>
       <option value="jump">GoJump</option>
     </select></div>
-    <div class="field"><select id="r-brand"><option id="r-brand-all" value="">Todas as marcas</option></select></div>
+    <div class="field msel">
+      <button type="button" class="msel-btn" id="r-brand-btn" aria-haspopup="true" aria-expanded="false"></button>
+      <div class="msel-panel" id="r-brand-panel" hidden></div>
+    </div>
     <div class="field"><select id="r-status"><option id="r-status-all" value="">Todos os status</option></select></div>
     <div class="search"><input id="r-q" type="search" placeholder="Buscar teste ou chave…"></div>
   </div>
@@ -452,13 +494,11 @@ const VERTS   = JSON.parse(document.getElementById('verts').textContent);
 const UPDATED = JSON.parse(document.getElementById('updated').textContent);
 const VNAME   = Object.fromEntries(VERTS);
 const storesOf = v => STORES.filter(s=>s.v===v);
-const vertOf = (storeKey) => STORES.find(s=>s.k===storeKey)?.v;
 const SN = Object.fromEntries(STORES.map(s=>[s.k,s.n]));
-// Cada aba escolhe seu próprio idioma a partir do seu próprio filtro (não existe uma vertical
-// global): Matriz/Testes olham a loja selecionada, Ganho olha o toggle de vertical, Roadmap olha
-// o filtro de vertical. Quando o filtro mistura as duas verticais, fica em português (padrão).
-const langMatrix  = () => (S.store  && vertOf(S.store)  === 'jump') ? 'en' : 'pt';
-const langTestes  = () => (S.tStore && vertOf(S.tStore) === 'jump') ? 'en' : 'pt';
+// Idioma da interface é uma escolha explícita (seletor PT/EN no header, ver S.lang), não mais
+// adivinhado pela marca selecionada.
+const langMatrix  = () => S.lang;
+const langTestes  = () => S.lang;
 const RES = {
   pt: {winner:'Vencedor', control:'Controle venceu', inconclusive:'Inconclusivo', running:'Em teste', paused:'Pausado'},
   en: {winner:'Winner',   control:'Control won',      inconclusive:'Inconclusive', running:'Running',  paused:'Paused'},
@@ -521,15 +561,62 @@ FAMS.sort((a,b)=> b.nStores - a.nStores || b.tests.length - a.tests.length
                 || a.name.localeCompare(b.name,'pt-BR'));
 const AREAS = [...new Set(FAMS.map(f=>f.area))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
 
-const storeOptions = VERTS.map(([v,label]) => {
-  const ss = STORES.filter(s=>s.v===v);
-  return ss.length ? `<optgroup label="${label}">`
-    + ss.map(s=>`<option value="${s.k}">${s.n}</option>`).join('') + `</optgroup>` : '';
-}).join('');
-for (const el of [document.getElementById('f-store'), document.getElementById('t-store')])
-  el.insertAdjacentHTML('beforeend', storeOptions);
 for (const el of [document.getElementById('f-area'), document.getElementById('t-area')])
   el.insertAdjacentHTML('beforeend', AREAS.map(a=>`<option value="${a}">${a}</option>`).join(''));
+
+/* ---------- dropdown de marca com seleção múltipla ----------
+   Substitui o <select> nativo (que só permite uma marca) por um botão + painel de
+   checkboxes, agrupado como os optgroups de antes. O valor é sempre um array — vazio
+   significa "todas as marcas" (sem filtro) — e fica salvo no localStorage, então
+   sobrevive a um F5. */
+function multiSelect({btnId, panelId, groups, storageKey, onChange}) {
+  const btn = document.getElementById(btnId), panel = document.getElementById(panelId);
+  const validValues = () => new Set(groups.flatMap(g=>g.options.map(o=>o.value)));
+  let value = [];
+  try {
+    const saved = JSON.parse(localStorage.getItem(storageKey) || '[]');
+    if (Array.isArray(saved)) { const valid = validValues(); value = saved.filter(v=>valid.has(v)); }
+  } catch {}
+  let lang = 'pt';
+  const allLabel = () => lang==='en' ? 'All brands' : 'Todas as marcas';
+  const manyLabel = n => lang==='en' ? `${n} brands` : `${n} marcas`;
+  const persist = () => { try { localStorage.setItem(storageKey, JSON.stringify(value)); } catch {} };
+  const isOpen = () => !panel.hidden;
+  const close = () => { panel.hidden = true; btn.setAttribute('aria-expanded','false'); };
+  const open = () => { panel.hidden = false; btn.setAttribute('aria-expanded','true'); renderPanel(); };
+  function renderPanel() {
+    panel.innerHTML = `<label class="msel-row msel-all"><input type="checkbox" data-all ${value.length?'':'checked'}>${allLabel()}</label>`
+      + groups.map(g => g.options.length ? `<div class="msel-group"><span class="msel-glabel">${esc(g.label)}</span>`
+        + g.options.map(o=>`<label class="msel-row"><input type="checkbox" value="${esc(o.value)}" ${value.includes(o.value)?'checked':''}>${esc(o.label)}</label>`).join('')
+        + `</div>` : '').join('');
+  }
+  function updateBtn() {
+    btn.textContent = !value.length ? allLabel()
+      : value.length===1 ? (groups.flatMap(g=>g.options).find(o=>o.value===value[0])?.label ?? value[0])
+      : manyLabel(value.length);
+  }
+  panel.addEventListener('change', e => {
+    const t = e.target; if (t.tagName !== 'INPUT') return;
+    if (t.dataset.all !== undefined) value = [];
+    else value = t.checked ? [...value, t.value] : value.filter(v=>v!==t.value);
+    persist(); renderPanel(); updateBtn(); onChange();
+  });
+  btn.addEventListener('click', e => { e.stopPropagation(); isOpen() ? close() : open(); });
+  document.addEventListener('click', e => { if (isOpen() && !panel.contains(e.target) && e.target!==btn) close(); });
+  document.addEventListener('keydown', e => { if (e.key==='Escape' && isOpen()) { close(); btn.focus(); } });
+  updateBtn();
+  return {
+    get value() { return value; },
+    set value(v) { value = Array.isArray(v) ? v.filter(x=>validValues().has(x)) : []; persist(); updateBtn(); if (isOpen()) renderPanel(); },
+    setLang(l) { lang = l; updateBtn(); if (isOpen()) renderPanel(); },
+  };
+}
+const STORE_GROUPS = VERTS.map(([v,label]) => ({label,
+  options: STORES.filter(s=>s.v===v).map(s=>({value:s.k,label:s.n}))})).filter(g=>g.options.length);
+const fStoreMsel = multiSelect({btnId:'f-store-btn', panelId:'f-store-panel', groups:STORE_GROUPS,
+  storageKey:'cro-matrix.f-store', onChange:() => { S.store = fStoreMsel.value; renderMatrix(); }});
+const tStoreMsel = multiSelect({btnId:'t-store-btn', panelId:'t-store-panel', groups:STORE_GROUPS,
+  storageKey:'cro-matrix.t-store', onChange:() => { S.tStore = tStoreMsel.value; renderTests(); }});
 
 document.getElementById('stamp').textContent =
   `${DATA.length} testes · ${STORES.length} marcas · atualizado ${
@@ -537,11 +624,17 @@ document.getElementById('stamp').textContent =
       {day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'}) : '—'}`;
 
 /* ---------- estado ---------- */
-const S = {view:'matriz', res:'', store:'', area:'', scope:'', q:'',
-           tStore:'', tRes:'', tStatus:'', tArea:'', tSort:'date', tQ:'', tFam:'',
-           rKind:'ab', rVert:'', rBrand:'', rStatus:'', rQ:'',
+// Idioma da interface — escolha explícita da pessoa usando, salva no localStorage para
+// sobreviver a um F5. Antes disso o idioma era adivinhado a partir da marca selecionada
+// (GoJump em inglês, o resto em português); agora é sempre o que a pessoa escolher aqui.
+let savedLang = 'pt';
+try { const l = localStorage.getItem('cro-matrix.lang'); if (l === 'pt' || l === 'en') savedLang = l; } catch {}
+
+const S = {view:'matriz', res:'', store:fStoreMsel.value, area:'', scope:'', q:'',
+           tStore:tStoreMsel.value, tRes:'', tStatus:'', tArea:'', tSort:'date', tQ:'', tFam:'',
+           rKind:'ab', rVert:'', rBrand:[], rStatus:'', rQ:'',
            gCo:JSON.parse(document.getElementById('verts').textContent)[0][0],
-           gStore:'', gGoal:'30'};
+           gStore:'', gGoal:'30', lang:savedLang};
 
 /* ---------- matriz ---------- */
 function cellHTML(ts, famName, storeKey, lang) {
@@ -572,7 +665,7 @@ function renderMatrix() {
   document.getElementById('f-res-control').textContent = RES[lang].control;
   document.getElementById('f-res-inconclusive').textContent = RES[lang].inconclusive;
   document.getElementById('f-res-running').textContent = RES[lang].running;
-  document.getElementById('f-store-all').textContent = lang==='en' ? 'All brands' : 'Todas as marcas';
+  fStoreMsel.setLang(lang);
   document.getElementById('f-area-all').textContent = lang==='en' ? 'All areas' : 'Todas as áreas';
   document.querySelectorAll('#f-area option[value]:not([value=""])').forEach(o => { o.textContent = trArea(o.value, lang); });
   document.getElementById('f-scope-all').textContent = lang==='en' ? 'All' : 'Todas';
@@ -580,15 +673,15 @@ function renderMatrix() {
   document.getElementById('f-scope-solo').textContent = lang==='en' ? 'Exclusive' : 'Exclusivas';
   document.getElementById('f-q').placeholder = lang==='en' ? 'Search family or test…' : 'Buscar família ou teste…';
 
-  const cols = S.store ? STORES.filter(s=>s.k===S.store) : STORES;
+  const cols = S.store.length ? STORES.filter(s=>S.store.includes(s.k)) : STORES;
   const q = S.q.trim().toLowerCase();
   const rows = FAMS.filter(f=>{
     if (S.area && f.area!==S.area) return false;
     if (S.scope==='multi' && f.nStores<2) return false;
     if (S.scope==='solo'  && f.nStores>1) return false;
-    if (S.store && !f.byStore[S.store]) return false;
+    if (S.store.length && !S.store.some(k=>f.byStore[k])) return false;
     if (S.res) {
-      const pool = S.store ? f.byStore[S.store] : f.tests;
+      const pool = S.store.length ? f.tests.filter(t=>S.store.includes(t.store)) : f.tests;
       if (!pool.some(t=>kind(t)===S.res)) return false;
     }
     if (q && !(f.name.toLowerCase().includes(q) || f.tests.some(t=>t.name.toLowerCase().includes(q))))
@@ -655,6 +748,9 @@ function cardHTML(t, lang) {
       <div class="pills">
         <span class="pill">${STATUS[lang][t.status]}</span>
         ${winner?`<span class="pill k-${t.cls}">${esc(winner)}</span>`:''}
+        ${t.testId?`<a class="card-link" href="https://elevateab.app/${t.testId}/results" target="_blank"
+          rel="noopener" title="${lang==='en'?'Open in Elevate':'Abrir no Elevate'}"
+          aria-label="${lang==='en'?'Open in Elevate':'Abrir no Elevate'}">↗</a>`:''}
       </div>
     </div>
     <div class="tiles">
@@ -676,7 +772,7 @@ function renderTests() {
   document.getElementById('v-testes').lang = lang;
   document.getElementById('tt-eyebrow').textContent = lang==='en' ? 'Results' : 'Resultados';
   document.getElementById('tt-h1').innerHTML = lang==='en' ? '<em>A/B</em> tests' : 'Testes <em>A/B</em>';
-  document.getElementById('t-store-all').textContent = lang==='en' ? 'All brands' : 'Todas as marcas';
+  tStoreMsel.setLang(lang);
   document.getElementById('t-res-all').textContent = lang==='en' ? 'All results' : 'Todos os resultados';
   document.getElementById('t-res-winner').textContent = RES[lang].winner;
   document.getElementById('t-res-control').textContent = RES[lang].control;
@@ -698,7 +794,7 @@ function renderTests() {
 
   const q = S.tQ.trim().toLowerCase();
   let list = DATA.filter(t=>{
-    if (S.tStore && t.store!==S.tStore) return false;
+    if (S.tStore.length && !S.tStore.includes(t.store)) return false;
     if (S.tRes && kind(t)!==S.tRes) return false;
     if (S.tStatus && t.status!==S.tStatus) return false;
     if (S.tArea && t.area!==S.tArea) return false;
@@ -767,11 +863,11 @@ document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>setView(b.dat
 const bind = (id, key, fn) => document.getElementById(id).addEventListener('input', e=>{
   S[key] = e.target.value; (fn||renderMatrix)();
 });
-bind('f-res','res'); bind('f-store','store'); bind('f-area','area'); bind('f-q','q');
-bind('t-store','tStore',renderTests); bind('t-res','tRes',renderTests);
+bind('f-res','res'); bind('f-area','area'); bind('f-q','q');
+bind('t-res','tRes',renderTests);
 bind('t-status','tStatus',renderTests); bind('t-area','tArea',renderTests);
 bind('t-sort','tSort',renderTests); bind('t-q','tQ',renderTests);
-bind('r-vert','rVert',renderRoadmap); bind('r-brand','rBrand',renderRoadmap);
+bind('r-vert','rVert',renderRoadmap);
 bind('r-status','rStatus',renderRoadmap); bind('r-q','rQ',renderRoadmap);
 bind('g-store','gStore',renderGanho); bind('g-goal','gGoal',renderGanho);
 document.getElementById('g-co').onclick = e => {
@@ -792,8 +888,9 @@ document.getElementById('r-kind').onclick = e => {
 };
 document.getElementById('rd-body').addEventListener('click', e => {
   const el = e.target.closest('[data-rfam]'); if (!el) return;
-  S.tFam = el.dataset.rfam; S.tStore=''; S.tRes=''; S.tStatus=''; S.tArea=''; S.tQ='';
-  ['t-store','t-res','t-status','t-area','t-q'].forEach(i=>document.getElementById(i).value='');
+  S.tFam = el.dataset.rfam; S.tStore=[]; S.tRes=''; S.tStatus=''; S.tArea=''; S.tQ='';
+  tStoreMsel.value = [];
+  ['t-res','t-status','t-area','t-q'].forEach(i=>document.getElementById(i).value='');
   renderTests(); setView('testes');
 });
 document.getElementById('f-scope').onclick = e => {
@@ -805,9 +902,9 @@ document.getElementById('f-scope').onclick = e => {
 document.querySelector('#mx tbody').addEventListener('click', e => {
   const el = e.target.closest('[data-fam]'); if (!el) return;
   S.tFam = el.dataset.fam;
-  S.tStore = el.dataset.store || '';
+  S.tStore = el.dataset.store ? [el.dataset.store] : [];
   S.tRes = ''; S.tStatus = ''; S.tArea = ''; S.tQ = '';
-  document.getElementById('t-store').value = S.tStore;
+  tStoreMsel.value = S.tStore;
   ['t-res','t-status','t-area','t-q'].forEach(i=>document.getElementById(i).value='');
   renderTests(); setView('testes');
 });
@@ -847,11 +944,20 @@ document.getElementById('theme').onclick = () => {
   const dark = cur ? cur==='dark' : matchMedia('(prefers-color-scheme:dark)').matches;
   document.documentElement.setAttribute('data-theme', dark ? 'light' : 'dark');
 };
+const langsel = document.getElementById('langsel');
+[...langsel.children].forEach(b => b.setAttribute('aria-pressed', String(b.dataset.lang===S.lang)));
+langsel.onclick = e => {
+  const b = e.target.closest('button'); if (!b || b.dataset.lang===S.lang) return;
+  S.lang = b.dataset.lang;
+  try { localStorage.setItem('cro-matrix.lang', S.lang); } catch {}
+  [...langsel.children].forEach(x=>x.setAttribute('aria-pressed', String(x===b)));
+  renderMatrix(); renderTests(); renderRoadmap(); renderGanho();
+};
 
 /* ---------- roadmap ---------- */
 const ROADMAP = JSON.parse(document.getElementById('roadmap').textContent);
 const VERT = VNAME;
-const langRoadmap = () => S.rVert === 'jump' ? 'en' : 'pt';
+const langRoadmap = () => S.lang;
 const KIND = {
   pt: {ab:'Teste A/B', epic:'Épico', prod:'Produto / infra'},
   en: {ab:'A/B test',  epic:'Epic',  prod:'Product / infra'},
@@ -873,9 +979,11 @@ const R_STATUS = [...new Set(ROADMAP.map(r=>r.status))].sort((a,b)=>SORD[a]-SORD
 // Rótulos de marca/optgroup são nomes próprios (Gobeaute/GoJump, nomes de marca) — não mudam de
 // idioma. Só o texto de status é traduzido, e só na exibição (o <option value> continua o dado
 // bruto do Jira, contra o que o filtro compara).
-document.getElementById('r-brand').insertAdjacentHTML('beforeend',
-  R_BRANDS_BY_VERT.map(([v,bs])=>`<optgroup label="${VERT[v]}">`
-    + bs.map(b=>`<option value="${b}">${b}</option>`).join('') + `</optgroup>`).join(''));
+const R_BRAND_GROUPS = R_BRANDS_BY_VERT.map(([v,bs]) => ({label:VERT[v],
+  options: bs.map(b=>({value:b,label:b}))})).filter(g=>g.options.length);
+const rBrandMsel = multiSelect({btnId:'r-brand-btn', panelId:'r-brand-panel', groups:R_BRAND_GROUPS,
+  storageKey:'cro-matrix.r-brand', onChange:() => { S.rBrand = rBrandMsel.value; renderRoadmap(); }});
+S.rBrand = rBrandMsel.value;
 document.getElementById('r-status').insertAdjacentHTML('beforeend',
   R_STATUS.map(s=>`<option value="${s}">${s}</option>`).join(''));
 
@@ -910,7 +1018,7 @@ function renderRoadmap() {
   document.getElementById('r-kind-ab').textContent = lang==='en' ? 'A/B tests' : 'Testes A/B';
   document.getElementById('r-kind-all').textContent = lang==='en' ? 'Everything' : 'Tudo';
   document.getElementById('r-vert-all').textContent = lang==='en' ? 'All verticals' : 'Todas as verticais';
-  document.getElementById('r-brand-all').textContent = lang==='en' ? 'All brands' : 'Todas as marcas';
+  rBrandMsel.setLang(lang);
   document.getElementById('r-status-all').textContent = lang==='en' ? 'All statuses' : 'Todos os status';
   document.querySelectorAll('#r-status option[value]:not([value=""])').forEach(o => { o.textContent = trStatus(o.value, lang); });
   document.getElementById('r-q').placeholder = lang==='en' ? 'Search test or key…' : 'Buscar teste ou chave…';
@@ -919,7 +1027,7 @@ function renderRoadmap() {
   const list = ROADMAP.filter(r=>{
     if (S.rKind && r.kind!==S.rKind) return false;
     if (S.rVert && r.vert!==S.rVert) return false;
-    if (S.rBrand && r.brand!==S.rBrand) return false;
+    if (S.rBrand.length && !S.rBrand.includes(r.brand)) return false;
     if (S.rStatus && r.status!==S.rStatus) return false;
     if (q && !(r.title+' '+r.key+' '+r.brand+' '+(r.note||'')).toLowerCase().includes(q)) return false;
     return true;
@@ -964,7 +1072,7 @@ const umaMoeda   = ss => new Set(ss.map(s=>s.c||'BRL')).size <= 1;
 const pesosDe    = ss => umaMoeda(ss) ? REV : VIS;
 const baseDoPeso = ss => umaMoeda(ss) ? 'receita observada' : 'visitantes';
 const baseDoPesoEN = ss => baseDoPeso(ss) === 'receita observada' ? 'observed revenue' : 'visitors';
-const langGanho = () => S.gCo === 'jump' ? 'en' : 'pt';
+const langGanho = () => S.lang;
 const winnersOf = k => DATA.filter(t=>t.store===k && t.cls==='winner' && t.rpvL!=null)
   .sort((a,b)=> (a.end||a.start).localeCompare(b.end||b.start));
 const compound = ts => ts.reduce((a,t)=>a*(1+t.rpvL/100), 1);
