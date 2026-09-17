@@ -144,17 +144,23 @@ main{max-width:1580px;margin:0 auto;padding:26px 22px 80px}
 
 /* ---------- matriz ---------- */
 .tablewrap{overflow:auto;max-height:min(560px, calc(100vh - 340px));background:var(--surface);
-  border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);
-  scrollbar-width:auto;scrollbar-color:var(--line-2) var(--panel)}
+  border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
 /* Barra de rolagem sempre visível e "clicável" — no macOS, o padrão do sistema é uma barra
    fina que só aparece durante o gesto de scroll, o que esconde que dá pra arrastar pro lado.
-   Estilizar ::-webkit-scrollbar força o estilo clássico (sempre visível) no Chrome/Safari. */
+   Estilizar ::-webkit-scrollbar força o estilo clássico (sempre visível) no Chrome/Safari.
+   Atenção: `scrollbar-color`/`scrollbar-width` com valor != auto fazem o Chrome ignorar TODAS
+   as regras ::-webkit-scrollbar do elemento — as duas coisas juntas se anulam e a barra volta
+   a ser overlay. Por isso o par padrão fica isolado num @supports que só pega no Firefox,
+   que é quem não entende ::-webkit-scrollbar. */
 .tablewrap::-webkit-scrollbar{width:14px;height:14px}
 .tablewrap::-webkit-scrollbar-track{background:var(--panel)}
 .tablewrap::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:999px;
   border:3px solid var(--panel)}
 .tablewrap::-webkit-scrollbar-thumb:hover{background:var(--muted)}
 .tablewrap::-webkit-scrollbar-corner{background:var(--panel)}
+@supports not selector(::-webkit-scrollbar){
+  .tablewrap{scrollbar-width:auto;scrollbar-color:var(--line-2) var(--panel)}
+}
 table{border-collapse:separate;border-spacing:0;width:100%;min-width:1040px}
 thead th{position:sticky;top:0;z-index:12;background:var(--panel);
   border-bottom:1px solid var(--line);padding:14px;text-align:center;
