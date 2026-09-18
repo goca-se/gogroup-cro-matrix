@@ -24,9 +24,15 @@ npm run refresh   # os dois
 O `dist/index.html` é autocontido: dados embutidos, Poppins inline em base64, zero requisição
 externa. Dá para abrir com duplo clique, servir de qualquer lugar ou anexar num e-mail.
 
-Em produção o [workflow](.github/workflows/refresh.yml) faz isso sozinho às **08:00 de Fortaleza,
-dias úteis**, comita o snapshot em `data/` e sobe a página como artefato do build.
-Dá para disparar na mão em Actions → *Atualizar matriz CRO* → *Run workflow*.
+Esse [workflow](.github/workflows/refresh.yml) roda sozinho às **08:00 de Fortaleza, dias úteis**,
+comita o snapshot em `data/` e sobe a página como artefato do build. Dá para disparar na mão em
+Actions → *Atualizar matriz CRO* → *Run workflow*.
+
+**A instância em `cro-gogroup.devgogroup.com` (GoDeploy) não está conectada a este workflow.**
+Ele não escuta push nem faz deploy nela — quem publica lá precisa gerar `dist/index.html` (`npm
+run build`, com dados atualizados) e republicar manualmente nesse app do GoDeploy. Mergear ou
+disparar o workflow aqui atualiza `data/` e o artefato do build, mas não move essa página em
+produção.
 
 ## Segredos
 
